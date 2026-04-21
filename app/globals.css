@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* JetBrains Mono for the terminal look */
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap");
+/* JetBrains Mono for UI/code · Inter for body copy */
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600&display=swap");
 
 /* highlight.js github-dark theme (inline, no extra request) */
 .hljs {
@@ -38,11 +38,16 @@ body {
   font-family: "JetBrains Mono", ui-monospace, monospace;
 }
 
+/* Prose body copy uses Inter for readability; code/headings stay mono */
+.font-prose { font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
+
 /* article prose styling */
 .prose-terminal h1 { font-size: 1.5rem; color: #f0f6fc; margin: 2rem 0 1rem; letter-spacing: -0.02em; }
 .prose-terminal h2 { font-size: 1.2rem; color: #7ee787; margin: 2rem 0 0.75rem; }
 .prose-terminal h3 { font-size: 1.05rem; color: #79c0ff; margin: 1.5rem 0 0.5rem; }
-.prose-terminal p  { margin: 0.9rem 0; line-height: 1.75; color: #c9d1d9; }
+.prose-terminal p  { margin: 0.9rem 0; line-height: 1.8; color: #c9d1d9; font-family: "Inter", ui-sans-serif, system-ui, sans-serif; font-size: 15px; }
+.prose-terminal li { font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
+.prose-terminal blockquote { font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
 .prose-terminal a  { color: #7ee787; text-decoration: underline; text-decoration-color: rgba(126,231,135,0.4); text-underline-offset: 3px; }
 .prose-terminal a:hover { text-decoration-color: #7ee787; }
 .prose-terminal ul, .prose-terminal ol { margin: 0.9rem 0; padding-left: 1.5rem; }

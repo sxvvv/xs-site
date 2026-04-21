@@ -1,16 +1,22 @@
 import Link from "next/link";
-import { Circle, Github, Twitter, Mail, ArrowUpRight, Terminal } from "lucide-react";
+import { Circle, Github, Twitter, Mail, ArrowUpRight, Terminal, FileCode2 } from "lucide-react";
 import TerminalShell from "./components/TerminalShell";
 import { SITE } from "@/lib/config";
+import { getPosts } from "@/lib/notion";
+import { FALLBACK_POSTS } from "@/lib/fallback";
 
 export const revalidate = 60;
 
-export default function HomePage() {
+export default async function HomePage() {
+  let posts = await getPosts();
+  if (posts.length === 0) posts = FALLBACK_POSTS;
+  const recent = posts.slice(0, 3);
+
   return (
     <TerminalShell>
       {/* ─── hero ─── */}
-      <section className="mb-10 pb-10 border-b border-neutral-800/70">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-emerald-400/70 mb-4">
+      <section className="mb-16 pb-12 border-b border-neutral-800/70">
+        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-emerald-400/70 mb-5">
           <Terminal className="w-3 h-3" />
           <span>welcome.sh</span>
         </div>
@@ -20,14 +26,15 @@ export default function HomePage() {
           <span className="text-neutral-600">=</span>{" "}
           <span className="text-amber-300">&quot;{SITE.name}&quot;</span>
           <span className="text-neutral-600">;</span>
+          <span className="inline-block w-2 h-6 md:h-9 ml-1 align-middle bg-emerald-300/80 animate-pulse" />
         </h1>
-        <p className="text-neutral-400 text-[14px] md:text-[15px] mt-5 max-w-2xl leading-[1.8]">
+        <p className="font-prose text-neutral-300 text-[15px] md:text-[16px] mt-7 max-w-2xl leading-[1.85]">
           {SITE.tagline}
         </p>
       </section>
 
       {/* ─── whoami ─── */}
-      <section className="space-y-6">
+      <section className="space-y-7">
         <div className="text-sm text-neutral-400 font-mono">
           <span className="text-emerald-400">$</span> whoami{" "}
           <span className="text-neutral-600">--verbose</span>
@@ -71,18 +78,18 @@ export default function HomePage() {
       </section>
 
       {/* ─── about ─── */}
-      <section className="mt-10 space-y-6">
+      <section className="mt-16 space-y-7">
         <div className="text-sm text-neutral-400 font-mono">
           <span className="text-emerald-400">$</span> cat{" "}
           <span className="text-cyan-300">about.md</span>
         </div>
 
         <div className="pl-4 md:pl-6 border-l-2 border-emerald-400/30">
-          <div className="text-neutral-200 text-[14px] leading-[1.9] space-y-4 max-w-2xl">
+          <div className="font-prose text-neutral-200 text-[15px] leading-[1.9] space-y-5 max-w-2xl">
             {SITE.about.map((p, i) => (
               <p
                 key={i}
-                className={i === SITE.about.length - 1 ? "text-neutral-400 text-[13px] pt-1" : ""}
+                className={i === SITE.about.length - 1 ? "text-neutral-400 text-[14px] pt-1" : ""}
               >
                 {p}
               </p>
@@ -91,8 +98,50 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ─── recent posts ─── */}
+      {recent.length > 0 && (
+        <section className="mt-16 space-y-6">
+          <div className="flex items-baseline justify-between">
+            <div className="text-sm text-neutral-400 font-mono">
+              <span className="text-emerald-400">$</span> tail -n 3{" "}
+              <span className="text-cyan-300">blog/</span>
+            </div>
+            <Link
+              href="/blog"
+              className="text-[11px] text-neutral-500 hover:text-emerald-300 transition-colors flex items-center gap-1"
+            >
+              view all <ArrowUpRight className="w-3 h-3" />
+            </Link>
+          </div>
+          <div className="pl-4 md:pl-6 divide-y divide-neutral-800/60">
+            {recent.map((p) => (
+              <Link
+                key={p.id}
+                href={`/blog/${p.slug}`}
+                className="group grid grid-cols-[auto_1fr] gap-4 py-3.5 items-baseline hover:bg-emerald-400/[0.03] -mx-2 px-2 transition-colors rounded-sm"
+              >
+                <div className="text-[11px] text-neutral-500 tabular-nums font-mono pt-0.5">
+                  {p.date}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[14px] text-neutral-100 group-hover:text-emerald-200 transition-colors truncate">
+                    <FileCode2 className="w-3 h-3 inline-block mr-2 -mt-0.5 text-neutral-600 group-hover:text-emerald-400/70 transition-colors" />
+                    {p.title}
+                  </div>
+                  {p.excerpt && (
+                    <div className="font-prose text-neutral-400 text-[13px] mt-1.5 leading-relaxed truncate">
+                      {p.excerpt}
+                    </div>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ─── contact ─── */}
-      <section className="mt-10 space-y-4">
+      <section className="mt-16 space-y-5">
         <div className="text-sm text-neutral-400 font-mono">
           <span className="text-emerald-400">$</span> ls{" "}
           <span className="text-cyan-300">contact/</span>

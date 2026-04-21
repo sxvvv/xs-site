@@ -172,9 +172,9 @@ export default function TerminalShell({ children }: { children: React.ReactNode 
             </aside>
 
             {/* main */}
-            <main className="p-6 md:p-8 min-w-0">
+            <main className="p-8 md:p-12 min-w-0">
               {/* breadcrumb */}
-              <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 mb-6 flex-wrap">
+              <div className="flex items-center gap-1.5 text-[11px] text-neutral-500 mb-10 flex-wrap">
                 <span>~</span>
                 <ChevronRight className="w-2.5 h-2.5" />
                 <span>{SITE.handle}</span>

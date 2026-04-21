@@ -1,267 +1,191 @@
 # nico-site
 
-个人网站 · 终端/IDE 风格 · Notion 同步博客笔记 · Next.js 15 · Vercel 免费部署
+Personal site with a terminal/IDE aesthetic. Content lives in Notion, site is built with Next.js 15, deployed on Vercel.
+
+**Live demo:** https://xs-site-phi.vercel.app
 
 ---
 
-## 🎯 这是什么
+## Features
 
-一个真正可以部署的个人站模板:
+- Terminal-style UI (JetBrains Mono, dark theme, sidebar, `⌘K` command palette)
+- Notion-backed content for blog posts and reading notes
+- Static generation with 60-second ISR
+- Markdown rendering with code highlighting
+- Zero config for the about / projects pages — everything lives in `lib/config.ts`
 
-- **终端美学** —— JetBrains Mono · 深色界面 · 侧边栏 · 命令面板 (`⌘K`)
-- **Notion 作为 CMS** —— 你在 Notion 写,网站自动显示
-- **完全免费** —— GitHub 托管代码 · Vercel 托管网站 · Notion API 免费额度很宽松
-- **静态生成 + ISR** —— 访问速度跟纯静态网站一样快,但内容每 60 秒自动更新
+## Pages
 
-页面:
-- `/` 关于我
-- `/blog` 博客列表 (来自 Notion)
-- `/blog/[slug]` 文章详情 (Markdown 渲染 + 代码高亮)
-- `/projects` 项目展示 (改 `lib/config.ts`)
-- `/notes` 读书笔记 (来自 Notion)
+| Route            | Content         | Source             |
+| ---------------- | --------------- | ------------------ |
+| `/`              | About           | `lib/config.ts`    |
+| `/projects`      | Projects        | `lib/config.ts`    |
+| `/blog`          | Blog list       | Notion (Blog DB)   |
+| `/blog/[slug]`   | Blog post       | Notion (Blog DB)   |
+| `/notes`         | Reading notes   | Notion (Notes DB)  |
+
+## Stack
+
+Next.js 15 (App Router) · React 18 · Tailwind CSS 3 · `@notionhq/client` + `notion-to-md` · `react-markdown` + `rehype-highlight` · `lucide-react`
+
+Deployed on Vercel Hobby (free).
 
 ---
 
-## 🚀 快速开始 (本地先跑起来)
+## Getting started
+
+Requires Node.js 20+.
 
 ```bash
-# 1. 安装依赖 (需要 Node.js 20+)
 npm install
-
-# 2. 先不管 Notion,直接跑 —— 会显示示例数据
 npm run dev
 ```
 
-打开 http://localhost:3000 —— **应该能看到网站了**。
+Without a Notion token the site falls back to sample data from `lib/fallback.ts`, so every page renders on first run. To wire up your own content, follow the steps below.
 
-*还在用示例数据? 正常。下一步配 Notion 之后内容就会被替换。*
+## Notion setup
 
----
+### 1. Create an integration
 
-## 📝 第一阶段 · 接入 Notion (15 分钟)
+Go to <https://www.notion.so/profile/integrations>, create an **Internal** integration, and copy the **Internal Integration Secret** (`ntn_...` or `secret_...`). This is your `NOTION_TOKEN`.
 
-### Step 1 · 创建 Notion Integration (拿 token)
+### 2. Create the Blog database
 
-1. 访问 https://www.notion.so/profile/integrations
-2. 点击 **"+ New integration"**
-3. 填名字 (比如 "我的网站"),Workspace 选你自己的,Type 选 **Internal**
-4. 创建后进入设置页,复制 **Internal Integration Secret**(格式 `ntn_xxx` 或 `secret_xxx`)—— 这就是你的 `NOTION_TOKEN`
+Create a full-page database named `Blog` with these properties:
 
-### Step 2 · 创建 Blog Database
+| Property | Type         | Notes                         |
+| -------- | ------------ | ----------------------------- |
+| Name     | Title        | Post title                    |
+| Date     | Date         | Published date                |
+| Tags     | Multi-select | —                             |
+| Status   | Select       | `Published` / `Draft`         |
+| Excerpt  | Text         | Optional                      |
+| ReadTime | Text         | Optional, e.g. `8 min`        |
 
-在 Notion 里新建一个 **full page database**(整页的表格),命名 "Blog"。添加这些字段:
+Open the database, click `···` → **Connections** → select your integration. The integration cannot read the database unless it is explicitly connected.
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| Name | Title | 文章标题 (默认就有) |
-| Date | Date | 发布日期 |
-| Tags | Multi-select | 标签 |
-| Status | Select | 值: `Published` / `Draft` |
-| Excerpt | Text | 摘要 (可选) |
-| ReadTime | Text | 例如 `8 min` (可选) |
+The database ID is the 32-character segment in the URL:
 
-**⚠️ 关键一步:** 打开这个 database 页面,右上角 `···` → `Connections` → 搜索你刚建的 integration → 点 Confirm。
+```
+https://notion.so/<workspace>/<DATABASE_ID>?v=...
+```
 
-**没连 integration = API 访问不到,这是最常见的坑。**
+### 3. Create the Notes database
 
-然后复制 database ID: database 的 URL 形如  
-`https://notion.so/your-workspace/a1b2c3d4e5f6...?v=xxxx`  
-问号前那串 32 位字母数字就是 `NOTION_BLOG_DATABASE_ID`。
+Create a second database named `Notes`:
 
-### Step 3 · 创建 Notes Database
+| Property | Type         | Notes                                      |
+| -------- | ------------ | ------------------------------------------ |
+| Name     | Title        | Book or paper title                        |
+| Kind     | Select       | `book` / `paper` / `framework` / `quote`   |
+| Author   | Text         | —                                          |
+| Progress | Number       | 0–100                                      |
+| Note     | Text         | Your notes                                 |
+| Updated  | Date         | Used for sorting                           |
 
-同样方式新建 "Notes" database,字段:
+Connect the integration to this database as well.
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| Name | Title | 书名/论文名 |
-| Kind | Select | 值: `book` / `paper` / `framework` / `quote` |
-| Author | Text | 作者 |
-| Progress | Number | 进度 0-100 |
-| Note | Text | 你的笔记 |
-| Updated | Date | 更新时间 (排序用) |
-
-同样记得 **Connect integration**,复制 database ID 作为 `NOTION_NOTES_DATABASE_ID`。
-
-### Step 4 · 本地配环境变量
+### 4. Environment variables
 
 ```bash
 cp .env.local.example .env.local
 ```
 
-打开 `.env.local`,填上三个值:
-
-```bash
-NOTION_TOKEN=ntn_你的token
-NOTION_BLOG_DATABASE_ID=32位blog_db_id
-NOTION_NOTES_DATABASE_ID=32位notes_db_id
+```env
+NOTION_TOKEN=ntn_xxxxxxxxxxxx
+NOTION_BLOG_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+NOTION_NOTES_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
-### Step 5 · 写第一篇文章
+Restart the dev server. Drafts are filtered out — only rows with `Status = Published` appear on the site.
 
-回到 Notion 的 Blog database:
-1. 新建一行 (一篇文章)
-2. 填 Name、Date、Tags、Excerpt
-3. **Status 设为 Published**
-4. 点进去,在页面正文区域正常写 (标题、代码块、引用、图片都支持)
+## Deployment
 
-### Step 6 · 重启 dev server
+1. Push the repository to GitHub.
+2. Import the repo at <https://vercel.com>.
+3. Add `NOTION_TOKEN`, `NOTION_BLOG_DATABASE_ID`, and `NOTION_NOTES_DATABASE_ID` under **Environment Variables**.
+4. Deploy.
 
-```bash
-# Ctrl+C 停止,再启动
-npm run dev
-```
+To bind a custom domain, go to **Project Settings → Domains** and follow the CNAME instructions.
 
-刷新页面 —— 你应该能看到自己的文章了 🎉
+Content refreshes automatically every 60 seconds (`export const revalidate = 60`). For immediate updates, trigger a redeploy from the Vercel dashboard.
 
 ---
 
-## 🌐 第二阶段 · 部署到 Vercel (10 分钟)
+## Customization
 
-### Step 1 · 推到 GitHub
+### Profile and projects
 
-```bash
-git init
-git add .
-git commit -m "initial"
-# 在 github.com 新建一个空仓库,然后:
-git remote add origin git@github.com:你的用户名/nico-site.git
-git branch -M main
-git push -u origin main
-```
+Edit `lib/config.ts`. Everything on `/` and `/projects` is pulled from this file — no Notion dependency.
 
-### Step 2 · 部署
+### Colors
 
-1. 访问 https://vercel.com,用 GitHub 账号登录
-2. 点 **"Add New..."** → **"Project"**
-3. 选你刚推的 `nico-site` 仓库,点 Import
-4. **在 "Environment Variables" 区域,把 `.env.local` 里的三个值加进去**  
-   (这一步不能漏 —— 否则线上版拉不到 Notion 数据)
-5. 点 Deploy
+The terminal palette is spread across components. Search and replace:
 
-大约 90 秒后,你会得到一个地址 `https://nico-site-xxx.vercel.app` —— **这就是你的网站**,任何人都能访问。
+| Role               | Tailwind token          |
+| ------------------ | ----------------------- |
+| Primary / commands | `emerald-300/400`       |
+| Secondary / links  | `cyan-300`              |
+| Strings / books    | `amber-300`             |
+| Quotes             | `pink-300`              |
 
-### Step 3 · (可选) 绑定自定义域名
+### Font
 
-如果你买了域名 (比如在 Cloudflare / Namecheap / 阿里云):
-1. Vercel Project Settings → Domains → Add
-2. 填你的域名,按提示在域名服务商处加 CNAME 记录
-3. 几分钟后 HTTPS 自动就绪
+First line of `app/globals.css`. Defaults to JetBrains Mono.
 
----
+### Adding a page
 
-## 🔄 日常使用流程
+Example — a `/uses` page for tools and hardware:
 
-写一篇新文章的完整流程:
+1. Create `app/uses/page.tsx` (model it on `app/projects/page.tsx`).
+2. Add an entry to the `NAV` array in `app/components/TerminalShell.tsx`:
+
+   ```ts
+   { id: "uses", label: "uses.md", icon: Wrench, hint: "env", href: "/uses" }
+   ```
+
+## Project structure
 
 ```
-1. 在 Notion Blog database 新建一行
-2. 写内容 · Status 设为 Published
-3. 回到 Vercel Dashboard → Deployments → Redeploy
-4. 30 秒后,新文章出现在你的网站上
-```
-
-**或者更自动化的做法:** 因为我们代码里设了 `export const revalidate = 60`,
-Vercel 会每 60 秒自动重新拉 Notion 数据。你写完文章不用做任何事,1 分钟内自动上线。
-
----
-
-## 🎨 定制
-
-### 改个人信息
-
-所有"关于我"的数据在 `lib/config.ts` —— 名字、bio、项目列表、社交链接全在这一个文件里,没有任何 Notion 依赖。
-
-### 改颜色 / 字体
-
-终端风格的配色散布在各组件里,搜索关键色值修改:
-- 主色(命令/强调): `emerald-300` / `emerald-400`
-- 副色(标签/链接): `cyan-300`
-- 字符串/书: `amber-300`
-- 引用: `pink-300`
-
-字体在 `app/globals.css` 第一行改(当前是 JetBrains Mono)。
-
-### 加新页面 / 板块
-
-比如想加一个 `/uses` 页面(介绍你用的工具):
-
-```
-app/uses/page.tsx  ← 新建这个文件,抄 projects/page.tsx 的结构
-```
-
-然后在 `app/components/TerminalShell.tsx` 的 `NAV` 数组里加一项:
-
-```ts
-{ id: "uses", label: "uses.md", icon: Wrench, hint: "env", href: "/uses" },
-```
-
----
-
-## 🐛 常见问题
-
-**Q: 部署后看不到 Notion 内容?**
-- 检查 Vercel 的 Environment Variables 是否配了三个值
-- 检查 Notion Integration 是否 Connect 到了两个 database
-- 检查文章的 Status 是不是 `Published` (大小写敏感)
-
-**Q: 我改了 Notion 但网站没更新?**
-- 默认 60 秒 revalidate 一次,等一下
-- 想立刻看到: Vercel Dashboard → Deployments → 最近一次 → ⋯ → Redeploy
-
-**Q: 想用自己已经存在的 Notion 笔记,不想重建 database?**
-- 可以,把 `lib/notion.ts` 里 `getProp(props, "XXX")` 的字段名改成你 database 的字段名即可
-- 这个文件已经做了大小写容错
-
-**Q: 可以支持评论吗?**
-- 最简单: 文章底部加 Giscus (基于 GitHub Discussions,免费)
-- 在 `app/blog/[slug]/page.tsx` 文章底部插入 Giscus 组件即可
-
-**Q: 图片在 Notion 里能显示,但在网站上看不到?**
-- Notion 的图片 URL 是临时签名的,会过期。生产方案是 build 时把图片下载到 `/public`
-- 或者把图片传到你自己的图床 (S3 / Cloudflare R2 / Imgur),在 Notion 里用外链
-
----
-
-## 📁 目录结构
-
-```
-nico-site/
+.
 ├── app/
 │   ├── blog/
-│   │   ├── [slug]/page.tsx   ← 文章详情
-│   │   └── page.tsx          ← 文章列表
-│   ├── notes/page.tsx        ← 读书笔记
-│   ├── projects/page.tsx     ← 项目展示
+│   │   ├── [slug]/page.tsx       # Post detail
+│   │   └── page.tsx              # Post list
+│   ├── notes/page.tsx
+│   ├── projects/page.tsx
 │   ├── components/
-│   │   ├── TerminalShell.tsx ← 终端外壳 (所有页面共用)
-│   │   └── CommandPalette.tsx← ⌘K 命令面板
-│   ├── globals.css           ← 全局样式 + 代码高亮
-│   ├── layout.tsx            ← 根布局
-│   └── page.tsx              ← 首页 (About)
+│   │   ├── TerminalShell.tsx     # Layout shell
+│   │   └── CommandPalette.tsx    # ⌘K
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx                  # About
 ├── lib/
-│   ├── config.ts             ← 个人信息 (改这个)
-│   ├── notion.ts             ← Notion API 封装
-│   └── fallback.ts           ← Notion 没配时的示例数据
-├── .env.local.example        ← 环境变量模板
+│   ├── config.ts                 # Profile, projects, socials
+│   ├── notion.ts                 # Notion client wrapper
+│   └── fallback.ts               # Sample data
+├── .env.local.example
 ├── next.config.js
-├── tailwind.config.js
-└── package.json
+└── tailwind.config.js
 ```
 
----
+## FAQ
 
-## 📦 技术栈
+**Content is missing after deploy.**
+Verify the three environment variables are set on Vercel, that both databases are connected to the integration, and that posts have `Status = Published` (case-sensitive).
 
-- **Next.js 15** (App Router · 静态生成 · ISR)
-- **React 18**
-- **Tailwind CSS 3**
-- **@notionhq/client** + **notion-to-md** (Notion → Markdown)
-- **react-markdown** + **rehype-highlight** (渲染 + 代码高亮)
-- **lucide-react** (图标)
+**Notion updates don't appear.**
+ISR revalidates every 60 seconds. For instant updates, redeploy from the Vercel dashboard.
 
-托管: Vercel Hobby (免费) · 每月 100GB 带宽,对个人站完全够用。
+**Can I reuse an existing Notion database?**
+Yes. Adjust the property names passed to `getProp(props, "...")` in `lib/notion.ts`. The helper is case-insensitive.
 
----
+**Images from Notion break over time.**
+Notion serves images from signed, short-lived URLs. Either download them to `/public` at build time or host them externally (S3, Cloudflare R2, etc.) and reference the external URL from Notion.
 
-Made with `<code>` and 🌑. MIT license.
+**How do I add comments?**
+Drop a Giscus component (GitHub Discussions-backed, free) at the bottom of `app/blog/[slug]/page.tsx`.
+
+## License
+
+MIT

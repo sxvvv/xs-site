@@ -4,18 +4,28 @@
 export const SITE = {
   handle: "suxin",
   name: "Su Xin",
-  role: "learning AI infra · notes · accumulation",
-  location: "~/earth/asia",
+  role: "incoming AI infra engineer · still learning",
+  location: "~/cn",
   status: "online",
-  tagline: "正在学习 AI infra,把读到的、写过的、踩过的坑慢慢攒下来。",
+  tagline:
+    "即将从校园走进工业界,做国产 GPU 方向的 AI infra。在那之前,把基础慢慢补齐 —— 这里是过程的脚印。",
   email: "suxin4726@gmail.com",
   github: "https://github.com/sxvvv",
-  twitter: "https://twitter.com/yourname",
-  interests: ["ai-infra", "operating-systems", "llm", "gpu", "distributed-systems", "mlsys", "cuda"],
+  twitter: "",
+  interests: [
+    "ai-infra",
+    "gpu",
+    "cuda",
+    "llm",
+    "mlsys",
+    "operating-systems",
+    "distributed-systems",
+  ],
   about: [
-    "你好,我是 Su Xin。目前正在学习 AI infra 的知识 —— 从模型训练、推理优化,到分布式系统、GPU 调度,一点一点积累。",
-    "这个站点是我的公开笔记本。把读过的论文、看过的源码、做过的实验整理成可以被搜索、被引用、被未来的我自己回看的形式。",
-    "— 还在路上,欢迎一起交流。",
+    "你好,我是 Su Xin。CS 方向硕士在读,即将毕业,下一站去做国产 GPU 相关的 AI infra 工程。",
+    "目前的状态是「入门」—— 从训练、推理优化,到并行策略、显存管理、底层调度,把缺的拼图一块一块补上。",
+    "这个站点是我的公开笔记本:把读过的论文、看过的源码、踩过的坑整理成可以被搜索、被引用、被未来自己回看的样子。慢一点也没关系,持续就是答案。",
+    "— 还在路上。",
   ],
   projects: [
     {

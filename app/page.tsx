@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Circle, Github, Twitter, Mail, ArrowUpRight, Terminal, FileCode2 } from "lucide-react";
+import { Circle, Github, Mail, ArrowUpRight, Terminal, FileCode2 } from "lucide-react";
 import TerminalShell from "./components/TerminalShell";
 import { SITE } from "@/lib/config";
 import { getPosts } from "@/lib/notion";
@@ -149,7 +149,6 @@ export default async function HomePage() {
         <div className="flex flex-wrap gap-2.5 text-[13px] pl-4 md:pl-6">
           {[
             { Icon: Github,  label: "github",      href: SITE.github },
-            { Icon: Twitter, label: "twitter",     href: SITE.twitter },
             { Icon: Mail,    label: SITE.email,    href: `mailto:${SITE.email}` },
           ].map(({ Icon, label, href }) => (
             <Link

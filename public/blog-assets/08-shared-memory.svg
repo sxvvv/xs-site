@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .bg{fill:#fafaf7}
+      .title{fill:#1f1f1f;font-weight:600}
+      .sub{fill:#6b6659}
+      .proc-main{fill:#fff5ea;stroke:#d4a070;stroke-width:1.4}
+      .proc-worker{fill:#eef3f8;stroke:#5b7db1;stroke-width:1.2}
+      .shm{fill:#f5efff;stroke:#8b6fb8;stroke-width:1.4}
+      .tensor{fill:#eef5ec;stroke:#7eb485;stroke-width:1.2}
+      .t-sm{font-size:11px;fill:#2a2a2a}
+      .t-md{font-size:13px;fill:#2a2a2a}
+      .t-lg{font-size:15px;fill:#2a2a2a;font-weight:600}
+      .t-mute{fill:#7a7466}
+      .t-code{font-size:11px;fill:#5b6b7d}
+      .edge{stroke:#7a7466;stroke-width:1.2;fill:none}
+      .edge-fd{stroke:#8b6fb8;stroke-width:1.4;fill:none;stroke-dasharray:5,3}
+      .pipe-arrow{stroke:#c76b5e;stroke-width:1.4;fill:none}
+    </style>
+    <marker id="a08" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a7466"/>
+    </marker>
+    <marker id="a08p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8b6fb8"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="620"/>
+
+  <text x="40" y="40" class="title" font-size="20">torch.multiprocessing · tensor 怎么 0 拷贝跨进程传</text>
+  <text x="40" y="62" class="sub" font-size="12">DataLoader(num_workers=4) 背后 · 每个子进程读 batch · 通过共享内存送回主进程</text>
+
+  <!-- Main process (top center) -->
+  <rect x="450" y="100" width="300" height="90" rx="8" class="proc-main"/>
+  <text x="600" y="128" class="t-lg" text-anchor="middle">主进程 · train.py</text>
+  <text x="600" y="150" class="t-code" text-anchor="middle">pid 1 · python</text>
+  <text x="600" y="170" class="t-code" text-anchor="middle">for batch in loader: model(batch)</text>
+
+  <!-- 4 worker processes -->
+  <g>
+    <rect x="60" y="240" width="220" height="90" rx="8" class="proc-worker"/>
+    <text x="170" y="268" class="t-lg" text-anchor="middle">worker 0</text>
+    <text x="170" y="290" class="t-code" text-anchor="middle">pid 37 · fork 后继承 fd</text>
+    <text x="170" y="308" class="t-code" text-anchor="middle">读 shard 0..25%</text>
+
+    <rect x="300" y="240" width="220" height="90" rx="8" class="proc-worker"/>
+    <text x="410" y="268" class="t-lg" text-anchor="middle">worker 1</text>
+    <text x="410" y="290" class="t-code" text-anchor="middle">pid 38</text>
+    <text x="410" y="308" class="t-code" text-anchor="middle">读 shard 25..50%</text>
+
+    <rect x="540" y="240" width="220" height="90" rx="8" class="proc-worker"/>
+    <text x="650" y="268" class="t-lg" text-anchor="middle">worker 2</text>
+    <text x="650" y="290" class="t-code" text-anchor="middle">pid 39</text>
+    <text x="650" y="308" class="t-code" text-anchor="middle">读 shard 50..75%</text>
+
+    <rect x="780" y="240" width="220" height="90" rx="8" class="proc-worker"/>
+    <text x="890" y="268" class="t-lg" text-anchor="middle">worker 3</text>
+    <text x="890" y="290" class="t-code" text-anchor="middle">pid 40</text>
+    <text x="890" y="308" class="t-code" text-anchor="middle">读 shard 75..100%</text>
+  </g>
+
+  <!-- /dev/shm region -->
+  <rect x="60" y="380" width="940" height="160" rx="8" class="shm"/>
+  <text x="78" y="406" class="t-lg" fill="#5a4a7a">/dev/shm · tmpfs · 内核中共享内存</text>
+  <text x="78" y="426" class="t-code">Linux 把 /dev/shm 挂载成 tmpfs · 实际驻留在 page cache · 不落盘</text>
+
+  <!-- shared tensor buffers -->
+  <rect x="80" y="450" width="200" height="70" rx="4" class="tensor"/>
+  <text x="180" y="472" class="t-md" text-anchor="middle" font-weight="600">shm_0 · fd=7</text>
+  <text x="180" y="490" class="t-code" text-anchor="middle">batch[0] tensor</text>
+  <text x="180" y="506" class="t-code" text-anchor="middle">256 MB · refcount=2</text>
+
+  <rect x="300" y="450" width="200" height="70" rx="4" class="tensor"/>
+  <text x="400" y="472" class="t-md" text-anchor="middle" font-weight="600">shm_1 · fd=8</text>
+  <text x="400" y="490" class="t-code" text-anchor="middle">batch[1] tensor</text>
+  <text x="400" y="506" class="t-code" text-anchor="middle">256 MB · refcount=2</text>
+
+  <rect x="520" y="450" width="200" height="70" rx="4" class="tensor"/>
+  <text x="620" y="472" class="t-md" text-anchor="middle" font-weight="600">shm_2 · fd=9</text>
+  <text x="620" y="490" class="t-code" text-anchor="middle">batch[2] tensor</text>
+  <text x="620" y="506" class="t-code" text-anchor="middle">256 MB · refcount=2</text>
+
+  <rect x="740" y="450" width="200" height="70" rx="4" class="tensor"/>
+  <text x="840" y="472" class="t-md" text-anchor="middle" font-weight="600">shm_3 · fd=10</text>
+  <text x="840" y="490" class="t-code" text-anchor="middle">batch[3] tensor</text>
+  <text x="840" y="506" class="t-code" text-anchor="middle">256 MB · refcount=2</text>
+
+  <!-- edges: worker mmaps shm -->
+  <path d="M 170 330 L 170 380" class="edge-fd" marker-end="url(#a08p)"/>
+  <path d="M 410 330 L 400 380" class="edge-fd" marker-end="url(#a08p)"/>
+  <path d="M 650 330 L 620 380" class="edge-fd" marker-end="url(#a08p)"/>
+  <path d="M 890 330 L 840 380" class="edge-fd" marker-end="url(#a08p)"/>
+
+  <!-- edges: main process also mmaps shm (right side down) -->
+  <path d="M 600 190 L 600 220 L 1040 220 L 1040 485 L 940 485" class="edge-fd" marker-end="url(#a08p)"/>
+  <text x="1060" y="355" class="t-code" text-anchor="middle" fill="#8b6fb8" font-weight="600">主进程</text>
+  <text x="1060" y="370" class="t-code" text-anchor="middle" fill="#8b6fb8">mmap 同一段</text>
+
+  <!-- Control channel: pipe/queue -->
+  <rect x="450" y="210" width="300" height="20" rx="3" fill="#fff3f0" stroke="#c76b5e" stroke-width="1"/>
+  <text x="600" y="224" class="t-code" text-anchor="middle" fill="#c76b5e" font-weight="600">multiprocessing.Queue（控制通道 · 只传 fd + meta）</text>
+  <path d="M 170 240 L 450 220" class="pipe-arrow" marker-end="url(#a08)" opacity="0.6"/>
+  <path d="M 600 230 L 600 240 Q 600 190 600 195" class="pipe-arrow" opacity="0.4"/>
+
+  <!-- Right side panel: two paths compared -->
+  <rect x="1020" y="100" width="160" height="260" rx="6" fill="#f2efe6" stroke="#d9d4c3"/>
+  <text x="1040" y="122" class="t-md" font-weight="600">IPC 对比</text>
+  <line x1="1040" y1="132" x2="1164" y2="132" stroke="#d9d4c3"/>
+  <text x="1040" y="152" class="t-code" font-weight="600">pipe / socket</text>
+  <text x="1040" y="168" class="t-code">发端 copy_from_user</text>
+  <text x="1040" y="182" class="t-code">收端 copy_to_user</text>
+  <text x="1040" y="196" class="t-code" fill="#c76b5e">→ 2 次拷贝</text>
+  <line x1="1040" y1="210" x2="1164" y2="210" stroke="#d9d4c3" stroke-dasharray="3,3"/>
+  <text x="1040" y="230" class="t-code" font-weight="600">shm + mmap</text>
+  <text x="1040" y="246" class="t-code">两进程映射同一</text>
+  <text x="1040" y="260" class="t-code">物理页</text>
+  <text x="1040" y="274" class="t-code" fill="#6a9955">→ 0 次拷贝</text>
+  <line x1="1040" y1="288" x2="1164" y2="288" stroke="#d9d4c3" stroke-dasharray="3,3"/>
+  <text x="1040" y="308" class="t-code">pipe 仍需要 ·</text>
+  <text x="1040" y="322" class="t-code">但只传 fd 和 shape</text>
+  <text x="1040" y="336" class="t-code">实际数据不走它</text>
+
+  <!-- bottom takeaway -->
+  <rect x="40" y="560" width="1120" height="48" rx="6" fill="#fff9ee" stroke="#e0c585"/>
+  <text x="56" y="582" class="t-sm"><tspan font-weight="600">TL;DR</tspan><tspan class="t-mute"> · fork 后子进程继承父进程的 fd 表 · 所以 worker 不需要再打开 shm</tspan></text>
+  <text x="56" y="600" class="t-sm t-mute">容器里 /dev/shm 默认 64MB · 大 tensor 会 OOM · docker run 时要显式 --shm-size=2g</text>
+</svg>

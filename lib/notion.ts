@@ -103,10 +103,11 @@ export async function getPosts(): Promise<Post[]> {
       getProp(props, "Tags")?.multi_select?.map((t: any) => t.name) ?? [];
     const excerpt = plainText(getProp(props, "Excerpt")?.rich_text);
     const readTime = plainText(getProp(props, "ReadTime")?.rich_text) || "5 min";
+    const explicitSlug = plainText(getProp(props, "Slug")?.rich_text).trim();
 
     return {
       id: page.id,
-      slug: slugify(title) || page.id.slice(0, 8),
+      slug: explicitSlug || slugify(title) || page.id.slice(0, 8),
       title,
       date: date.slice(0, 10),
       tags,

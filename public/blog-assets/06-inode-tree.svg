@@ -1,0 +1,186 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .bg{fill:#fafaf7}
+      .title{fill:#1f1f1f;font-weight:600}
+      .sub{fill:#6b6659}
+      .inode{fill:#fff5ea;stroke:#d4a070;stroke-width:1.4}
+      .ptr-direct{fill:#eef5ec;stroke:#7eb485;stroke-width:1}
+      .ptr-ind{fill:#eef3f8;stroke:#5b7db1;stroke-width:1}
+      .ptr-dind{fill:#f5efff;stroke:#8b6fb8;stroke-width:1}
+      .ptr-tind{fill:#fff3f0;stroke:#c76b5e;stroke-width:1}
+      .data-block{fill:#ffffff;stroke:#b8b39e;stroke-width:0.8}
+      .t-sm{font-size:11px;fill:#2a2a2a}
+      .t-md{font-size:13px;fill:#2a2a2a}
+      .t-lg{font-size:15px;fill:#2a2a2a;font-weight:600}
+      .t-mute{fill:#7a7466}
+      .t-code{font-size:10px;fill:#5b6b7d}
+      .edge{stroke:#7a7466;stroke-width:1;fill:none}
+    </style>
+    <marker id="a06" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a7466"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="660"/>
+
+  <text x="40" y="40" class="title" font-size="20">ext inode · 一个文件怎么指向它的数据块</text>
+  <text x="40" y="62" class="sub" font-size="12">15 个指针槽位 · 前 12 直指 · 后 3 个用一层 / 两层 / 三层间接 · 这就是经典 UNIX fs 的心脏</text>
+
+  <!-- Left: inode metadata block -->
+  <rect x="40" y="100" width="220" height="420" rx="8" class="inode"/>
+  <text x="150" y="128" class="t-lg" text-anchor="middle">inode · 256 bytes</text>
+  <line x1="56" y1="140" x2="244" y2="140" stroke="#d4a070"/>
+
+  <text x="56" y="162" class="t-code">mode / perms</text>
+  <text x="244" y="162" class="t-code" text-anchor="end">0644</text>
+  <text x="56" y="180" class="t-code">uid / gid</text>
+  <text x="244" y="180" class="t-code" text-anchor="end">1000 / 1000</text>
+  <text x="56" y="198" class="t-code">size</text>
+  <text x="244" y="198" class="t-code" text-anchor="end">...</text>
+  <text x="56" y="216" class="t-code">atime / mtime / ctime</text>
+  <text x="244" y="216" class="t-code" text-anchor="end">...</text>
+  <text x="56" y="234" class="t-code">links_count</text>
+  <text x="244" y="234" class="t-code" text-anchor="end">1</text>
+
+  <line x1="56" y1="248" x2="244" y2="248" stroke="#d4a070" stroke-dasharray="3,3"/>
+  <text x="56" y="268" class="t-sm" font-weight="600">block pointers[15]</text>
+
+  <!-- 12 direct -->
+  <g>
+    <rect x="56" y="278" width="188" height="20" rx="2" class="ptr-direct"/>
+    <text x="62" y="292" class="t-code">[0..11] direct × 12</text>
+  </g>
+  <!-- single indirect -->
+  <g>
+    <rect x="56" y="304" width="188" height="20" rx="2" class="ptr-ind"/>
+    <text x="62" y="318" class="t-code">[12] single indirect</text>
+  </g>
+  <!-- double -->
+  <g>
+    <rect x="56" y="330" width="188" height="20" rx="2" class="ptr-dind"/>
+    <text x="62" y="344" class="t-code">[13] double indirect</text>
+  </g>
+  <!-- triple -->
+  <g>
+    <rect x="56" y="356" width="188" height="20" rx="2" class="ptr-tind"/>
+    <text x="62" y="370" class="t-code">[14] triple indirect</text>
+  </g>
+
+  <text x="56" y="402" class="t-sm" font-weight="600">块大小 = 4 KiB</text>
+  <text x="56" y="420" class="t-code t-mute">每个指针 4 bytes →</text>
+  <text x="56" y="436" class="t-code t-mute">一个间接块装 1024 指针</text>
+
+  <line x1="56" y1="448" x2="244" y2="448" stroke="#d4a070" stroke-dasharray="3,3"/>
+  <text x="56" y="468" class="t-sm" font-weight="600">能寻址的文件大小</text>
+  <text x="56" y="486" class="t-code">direct: 48 KiB</text>
+  <text x="56" y="502" class="t-code">+ single: 4 MiB</text>
+  <text x="56" y="516" class="t-code">+ double: 4 GiB · + triple: 4 TiB</text>
+
+  <!-- Right side: pointer tree -->
+  <!-- direct data blocks -->
+  <g>
+    <rect x="340" y="120" width="100" height="30" rx="3" class="data-block"/>
+    <text x="390" y="140" class="t-code" text-anchor="middle">data block 0</text>
+    <rect x="340" y="160" width="100" height="30" rx="3" class="data-block"/>
+    <text x="390" y="180" class="t-code" text-anchor="middle">data block 1</text>
+    <text x="390" y="210" class="t-code t-mute" text-anchor="middle">...</text>
+    <rect x="340" y="220" width="100" height="30" rx="3" class="data-block"/>
+    <text x="390" y="240" class="t-code" text-anchor="middle">data block 11</text>
+  </g>
+  <!-- edges from direct pointers -->
+  <path d="M 244 288 L 280 288 L 280 135 L 340 135" class="edge" marker-end="url(#a06)"/>
+  <path d="M 280 288 L 280 175 L 340 175" class="edge"/>
+  <path d="M 280 288 L 280 235 L 340 235" class="edge"/>
+
+  <!-- single indirect -->
+  <rect x="340" y="290" width="100" height="80" rx="3" class="ptr-ind"/>
+  <text x="390" y="310" class="t-code" text-anchor="middle" font-weight="600">indirect blk</text>
+  <text x="390" y="328" class="t-code" text-anchor="middle">1024 ptrs</text>
+  <text x="390" y="346" class="t-code" text-anchor="middle">→ 1024 data</text>
+  <text x="390" y="362" class="t-code" text-anchor="middle">blocks</text>
+  <path d="M 244 314 L 340 330" class="edge" marker-end="url(#a06)"/>
+
+  <rect x="490" y="290" width="100" height="30" rx="3" class="data-block"/>
+  <text x="540" y="310" class="t-code" text-anchor="middle">data</text>
+  <text x="540" y="338" class="t-code t-mute" text-anchor="middle">× 1024</text>
+  <rect x="490" y="345" width="100" height="25" rx="3" class="data-block"/>
+  <text x="540" y="362" class="t-code" text-anchor="middle">data</text>
+  <path d="M 440 330 L 490 305" class="edge" marker-end="url(#a06)"/>
+  <path d="M 440 330 L 490 357" class="edge" marker-end="url(#a06)"/>
+
+  <!-- double indirect -->
+  <rect x="340" y="395" width="100" height="60" rx="3" class="ptr-dind"/>
+  <text x="390" y="415" class="t-code" text-anchor="middle" font-weight="600">d-indirect</text>
+  <text x="390" y="433" class="t-code" text-anchor="middle">1024 ptrs</text>
+  <text x="390" y="448" class="t-code" text-anchor="middle">→ indirect blks</text>
+  <path d="M 244 340 L 310 340 L 310 420 L 340 420" class="edge" marker-end="url(#a06)"/>
+
+  <rect x="490" y="395" width="100" height="28" rx="3" class="ptr-ind"/>
+  <text x="540" y="413" class="t-code" text-anchor="middle">indirect</text>
+  <rect x="490" y="430" width="100" height="28" rx="3" class="ptr-ind"/>
+  <text x="540" y="448" class="t-code" text-anchor="middle">indirect</text>
+  <path d="M 440 420 L 490 409" class="edge" marker-end="url(#a06)"/>
+  <path d="M 440 435 L 490 444" class="edge" marker-end="url(#a06)"/>
+
+  <rect x="640" y="395" width="100" height="28" rx="3" class="data-block"/>
+  <text x="690" y="413" class="t-code" text-anchor="middle">data</text>
+  <rect x="640" y="430" width="100" height="28" rx="3" class="data-block"/>
+  <text x="690" y="448" class="t-code" text-anchor="middle">data</text>
+  <path d="M 590 409 L 640 409" class="edge" marker-end="url(#a06)"/>
+  <path d="M 590 444 L 640 444" class="edge" marker-end="url(#a06)"/>
+
+  <!-- triple indirect -->
+  <rect x="340" y="480" width="100" height="50" rx="3" class="ptr-tind"/>
+  <text x="390" y="498" class="t-code" text-anchor="middle" font-weight="600">t-indirect</text>
+  <text x="390" y="516" class="t-code" text-anchor="middle">1024 ptrs</text>
+  <path d="M 244 366 L 300 366 L 300 500 L 340 500" class="edge" marker-end="url(#a06)"/>
+
+  <rect x="490" y="480" width="100" height="50" rx="3" class="ptr-dind"/>
+  <text x="540" y="498" class="t-code" text-anchor="middle">d-indirect</text>
+  <text x="540" y="516" class="t-code" text-anchor="middle">× 1024</text>
+  <path d="M 440 505 L 490 505" class="edge" marker-end="url(#a06)"/>
+
+  <rect x="640" y="480" width="100" height="50" rx="3" class="ptr-ind"/>
+  <text x="690" y="498" class="t-code" text-anchor="middle">indirect</text>
+  <text x="690" y="516" class="t-code" text-anchor="middle">× 1024</text>
+  <path d="M 590 505 L 640 505" class="edge" marker-end="url(#a06)"/>
+
+  <rect x="790" y="480" width="100" height="50" rx="3" class="data-block"/>
+  <text x="840" y="498" class="t-code" text-anchor="middle">data</text>
+  <text x="840" y="516" class="t-code" text-anchor="middle">× 1024</text>
+  <path d="M 740 505 L 790 505" class="edge" marker-end="url(#a06)"/>
+
+  <!-- Right column: implications -->
+  <rect x="920" y="100" width="240" height="420" rx="8" fill="#f2efe6" stroke="#d9d4c3"/>
+  <text x="938" y="124" class="t-md" font-weight="600">为什么小文件是灾难</text>
+  <line x1="938" y1="134" x2="1144" y2="134" stroke="#d9d4c3"/>
+
+  <text x="938" y="154" class="t-code">假设 10M 张 32KB 图片</text>
+  <text x="938" y="172" class="t-code">= 10M 个 inode</text>
+  <text x="938" y="190" class="t-code">· inode 表耗磁盘 GB 级</text>
+  <text x="938" y="208" class="t-code">· 每次打开走 dentry 查找</text>
+  <text x="938" y="226" class="t-code">· 顺序读变成随机 IO</text>
+
+  <line x1="938" y1="242" x2="1144" y2="242" stroke="#d9d4c3" stroke-dasharray="3,3"/>
+  <text x="938" y="262" class="t-md" font-weight="600">打包成一个大文件</text>
+  <text x="938" y="280" class="t-code">LMDB / WebDataset /</text>
+  <text x="938" y="296" class="t-code">TFRecord / tar shards</text>
+
+  <text x="938" y="320" class="t-code">· 1 个 inode</text>
+  <text x="938" y="336" class="t-code">· mmap 一次映射全部</text>
+  <text x="938" y="352" class="t-code">· 顺序读友好</text>
+  <text x="938" y="368" class="t-code">· page cache 命中率高</text>
+
+  <line x1="938" y1="384" x2="1144" y2="384" stroke="#d9d4c3" stroke-dasharray="3,3"/>
+  <text x="938" y="404" class="t-md" font-weight="600">ext4 的改进</text>
+  <text x="938" y="422" class="t-code">· extent tree 替代间接块</text>
+  <text x="938" y="438" class="t-code">· 一个 extent 一组连续块</text>
+  <text x="938" y="454" class="t-code">· 更省元数据 · 更快遍历</text>
+  <text x="938" y="480" class="t-code t-mute">inode 结构是 UNIX 老</text>
+  <text x="938" y="496" class="t-code t-mute">设计 · 理解它就够用了</text>
+
+  <!-- Bottom takeaway -->
+  <rect x="40" y="600" width="1120" height="40" rx="6" fill="#fff9ee" stroke="#e0c585"/>
+  <text x="56" y="624" class="t-sm"><tspan font-weight="600">TL;DR</tspan><tspan class="t-mute"> · 数据集打包是 OS 层的最大收益点 · 从 10M inode 压到 1k shard · 训练 IO 从瓶颈变不瓶颈</tspan></text>
+</svg>

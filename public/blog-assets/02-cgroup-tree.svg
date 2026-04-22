@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 650" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .bg{fill:#fafaf7}
+      .title{fill:#1f1f1f;font-weight:600}
+      .sub{fill:#6b6659}
+      .node-root{fill:#f2efe6;stroke:#b8b39e;stroke-width:1.4}
+      .node-sys{fill:#eef3f8;stroke:#5b7db1;stroke-width:1.2}
+      .node-pod{fill:#fff5ea;stroke:#d4a070;stroke-width:1.2}
+      .node-leaf{fill:#eef5ec;stroke:#7eb485;stroke-width:1.2}
+      .t-sm{font-size:11px;fill:#2a2a2a}
+      .t-md{font-size:13px;fill:#2a2a2a}
+      .t-lg{font-size:15px;fill:#2a2a2a;font-weight:600}
+      .t-mute{fill:#7a7466}
+      .t-code{font-size:11px;fill:#5b6b7d}
+      .edge{stroke:#b8b39e;stroke-width:1.2;fill:none}
+      .limit-box{fill:#fff9ee;stroke:#e0c585;stroke-width:1}
+      .accent{fill:#c76b5e}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="650"/>
+
+  <text x="40" y="40" class="title" font-size="20">cgroup v2 · k8s 训练 Pod 的资源墙在哪里</text>
+  <text x="40" y="62" class="sub" font-size="12">一张图看清：/sys/fs/cgroup 的树状结构 · 谁写的限制 · OOMKill 从哪里发起</text>
+
+  <!-- Root -->
+  <rect x="480" y="90" width="240" height="60" rx="6" class="node-root"/>
+  <text x="600" y="115" class="t-lg" text-anchor="middle">/ (root cgroup)</text>
+  <text x="600" y="135" class="t-code" text-anchor="middle">/sys/fs/cgroup/</text>
+
+  <!-- Level 2: system slices -->
+  <rect x="120" y="200" width="240" height="60" rx="6" class="node-sys"/>
+  <text x="240" y="225" class="t-md" text-anchor="middle" font-weight="600">system.slice</text>
+  <text x="240" y="245" class="t-code" text-anchor="middle">systemd · sshd · journald</text>
+
+  <rect x="400" y="200" width="260" height="60" rx="6" class="node-sys"/>
+  <text x="530" y="225" class="t-md" text-anchor="middle" font-weight="600">kubepods.slice</text>
+  <text x="530" y="245" class="t-code" text-anchor="middle">k8s 所有 Pod 的根</text>
+
+  <rect x="700" y="200" width="220" height="60" rx="6" class="node-sys"/>
+  <text x="810" y="225" class="t-md" text-anchor="middle" font-weight="600">user.slice</text>
+  <text x="810" y="245" class="t-code" text-anchor="middle">ssh 登录的 shell</text>
+
+  <!-- edges L1->L2 -->
+  <path d="M 600 150 L 600 175 L 240 175 L 240 200" class="edge"/>
+  <path d="M 600 175 L 530 175 L 530 200" class="edge"/>
+  <path d="M 600 175 L 810 175 L 810 200" class="edge"/>
+
+  <!-- Level 3: pods under kubepods -->
+  <rect x="280" y="320" width="220" height="60" rx="6" class="node-pod"/>
+  <text x="390" y="345" class="t-md" text-anchor="middle" font-weight="600">burstable/pod-abc</text>
+  <text x="390" y="365" class="t-code" text-anchor="middle">推理服务 · requests&lt;limits</text>
+
+  <rect x="540" y="320" width="260" height="60" rx="6" class="node-pod"/>
+  <text x="670" y="345" class="t-md" text-anchor="middle" font-weight="600">guaranteed/pod-train-0</text>
+  <text x="670" y="365" class="t-code" text-anchor="middle">训练任务 · requests==limits</text>
+
+  <!-- edges L2->L3 -->
+  <path d="M 530 260 L 530 295 L 390 295 L 390 320" class="edge"/>
+  <path d="M 530 295 L 670 295 L 670 320" class="edge"/>
+
+  <!-- Level 4: container under pod -->
+  <rect x="540" y="440" width="260" height="70" rx="6" class="node-leaf"/>
+  <text x="670" y="465" class="t-md" text-anchor="middle" font-weight="600">pytorch-worker-0 (container)</text>
+  <text x="670" y="484" class="t-code" text-anchor="middle">pid 1: python train.py</text>
+  <text x="670" y="500" class="t-code" text-anchor="middle">pid 37..44: DataLoader workers</text>
+
+  <path d="M 670 380 L 670 440" class="edge"/>
+
+  <!-- Right side: cgroup files shown -->
+  <rect x="870" y="320" width="300" height="260" rx="6" class="limit-box"/>
+  <text x="886" y="344" class="t-md" font-weight="600">pod-train-0/cgroup.* 文件</text>
+  <line x1="886" y1="352" x2="1154" y2="352" stroke="#e0c585"/>
+
+  <text x="886" y="374" class="t-code">cpu.max</text>
+  <text x="1154" y="374" class="t-code" text-anchor="end">800000 100000  // 8 cores</text>
+
+  <text x="886" y="396" class="t-code">memory.max</text>
+  <text x="1154" y="396" class="t-code" text-anchor="end">68719476736  // 64 GiB</text>
+
+  <text x="886" y="418" class="t-code">memory.swap.max</text>
+  <text x="1154" y="418" class="t-code" text-anchor="end">0</text>
+
+  <text x="886" y="440" class="t-code">pids.max</text>
+  <text x="1154" y="440" class="t-code" text-anchor="end">4096</text>
+
+  <text x="886" y="462" class="t-code">io.max</text>
+  <text x="1154" y="462" class="t-code" text-anchor="end">259:0 rbps=max wbps=max</text>
+
+  <line x1="886" y1="478" x2="1154" y2="478" stroke="#e0c585" stroke-dasharray="3,3"/>
+  <text x="886" y="498" class="t-sm accent" font-weight="600">超 memory.max 怎么办</text>
+  <text x="886" y="516" class="t-code">→ OOM killer 选 oom_score</text>
+  <text x="886" y="532" class="t-code">   最高的进程 SIGKILL</text>
+  <text x="886" y="550" class="t-code">→ 通常是占显存的 python</text>
+  <text x="886" y="568" class="t-code">→ 日志见 dmesg · ExitCode 137</text>
+
+  <!-- Bottom takeaway -->
+  <rect x="40" y="600" width="1120" height="38" rx="6" fill="#f2efe6" stroke="#d9d4c3"/>
+  <text x="56" y="624" class="t-sm"><tspan font-weight="600">TL;DR</tspan><tspan class="t-mute"> · docker --cpus/--memory 最终都落在这里 · nvidia-smi 看到的 GPU 进程不受 cgroup 管（GPU 隔离走 MIG/MPS/时间片）</tspan></text>
+</svg>

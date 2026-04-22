@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 620" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .bg{fill:#fafaf7}
+      .title{fill:#1f1f1f;font-weight:600}
+      .sub{fill:#6b6659}
+      .stage{fill:#ffffff;stroke:#b8b39e;stroke-width:1.4}
+      .stage-io{fill:#eef3f8;stroke:#5b7db1;stroke-width:1.4}
+      .stage-cpu{fill:#fff5ea;stroke:#d4a070;stroke-width:1.4}
+      .stage-copy{fill:#f5efff;stroke:#8b6fb8;stroke-width:1.4}
+      .stage-gpu{fill:#eef5ec;stroke:#7eb485;stroke-width:1.4}
+      .t-sm{font-size:11px;fill:#2a2a2a}
+      .t-md{font-size:13px;fill:#2a2a2a}
+      .t-lg{font-size:15px;fill:#2a2a2a;font-weight:600}
+      .t-xl{font-size:17px;fill:#1f1f1f;font-weight:700}
+      .t-mute{fill:#7a7466}
+      .t-code{font-size:11px;fill:#5b6b7d;font-weight:500}
+      .arrow{stroke:#6b6659;stroke-width:1.6;fill:none}
+      .opt-box{fill:#fff9ee;stroke:#c4a057;stroke-width:1}
+      .opt-green{fill:#eef5ec;stroke:#7eb485;stroke-width:1}
+      .accent{fill:#c76b5e;font-weight:600}
+    </style>
+    <marker id="a03" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6b6659"/>
+    </marker>
+    <marker id="a03s" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c4a057"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="620"/>
+
+  <text x="40" y="40" class="title" font-size="20">一次 DataLoader 迭代走过的路 · 四段瓶颈定位</text>
+  <text x="40" y="62" class="sub" font-size="12">每个优化参数只救一段 · 别乱开</text>
+
+  <!-- Stage numbers -->
+  <text x="140" y="100" class="t-mute t-sm" text-anchor="middle">① 读盘</text>
+  <text x="380" y="100" class="t-mute t-sm" text-anchor="middle">② 解码 / augment</text>
+  <text x="620" y="100" class="t-mute t-sm" text-anchor="middle">③ 进 pinned 内存</text>
+  <text x="860" y="100" class="t-mute t-sm" text-anchor="middle">④ H2D 拷贝</text>
+  <text x="1100" y="100" class="t-mute t-sm" text-anchor="middle">⑤ 算</text>
+
+  <!-- 5 stage boxes -->
+  <rect x="50" y="120" width="180" height="100" rx="8" class="stage-io"/>
+  <text x="140" y="150" class="t-lg" text-anchor="middle">disk read</text>
+  <text x="140" y="172" class="t-sm t-mute" text-anchor="middle">open / read / mmap</text>
+  <text x="140" y="192" class="t-code" text-anchor="middle">page cache / DMA</text>
+  <text x="140" y="210" class="t-code" text-anchor="middle">syscall 密集</text>
+
+  <rect x="290" y="120" width="180" height="100" rx="8" class="stage-cpu"/>
+  <text x="380" y="150" class="t-lg" text-anchor="middle">decode + aug</text>
+  <text x="380" y="172" class="t-sm t-mute" text-anchor="middle">jpeg / tokenizer</text>
+  <text x="380" y="192" class="t-code" text-anchor="middle">纯 CPU 计算</text>
+  <text x="380" y="210" class="t-code" text-anchor="middle">Python GIL 受限</text>
+
+  <rect x="530" y="120" width="180" height="100" rx="8" class="stage-copy"/>
+  <text x="620" y="150" class="t-lg" text-anchor="middle">into pinned</text>
+  <text x="620" y="172" class="t-sm t-mute" text-anchor="middle">pageable → pinned</text>
+  <text x="620" y="192" class="t-code" text-anchor="middle">collate_fn 走这里</text>
+  <text x="620" y="210" class="t-code" text-anchor="middle">一次 CPU 内拷贝</text>
+
+  <rect x="770" y="120" width="180" height="100" rx="8" class="stage-copy"/>
+  <text x="860" y="150" class="t-lg" text-anchor="middle">H2D copy</text>
+  <text x="860" y="172" class="t-sm t-mute" text-anchor="middle">PCIe Gen4 x16</text>
+  <text x="860" y="192" class="t-code" text-anchor="middle">~32 GB/s 理论</text>
+  <text x="860" y="210" class="t-code" text-anchor="middle">DMA engine 搬运</text>
+
+  <rect x="1010" y="120" width="150" height="100" rx="8" class="stage-gpu"/>
+  <text x="1085" y="150" class="t-lg" text-anchor="middle">forward</text>
+  <text x="1085" y="172" class="t-sm t-mute" text-anchor="middle">CUDA kernel</text>
+  <text x="1085" y="192" class="t-code" text-anchor="middle">GPU VRAM</text>
+  <text x="1085" y="210" class="t-code" text-anchor="middle">SM 运算</text>
+
+  <!-- Arrows between stages -->
+  <path d="M 230 170 L 288 170" class="arrow" marker-end="url(#a03)"/>
+  <path d="M 470 170 L 528 170" class="arrow" marker-end="url(#a03)"/>
+  <path d="M 710 170 L 768 170" class="arrow" marker-end="url(#a03)"/>
+  <path d="M 950 170 L 1008 170" class="arrow" marker-end="url(#a03)"/>
+
+  <!-- Optimization callouts below each stage -->
+  <rect x="50" y="280" width="180" height="90" rx="6" class="opt-box"/>
+  <text x="140" y="302" class="t-md" text-anchor="middle" font-weight="600">num_workers</text>
+  <text x="140" y="322" class="t-sm t-mute" text-anchor="middle">多进程读盘 / 解码</text>
+  <text x="140" y="340" class="t-code" text-anchor="middle">救 ① + ②</text>
+  <text x="140" y="358" class="t-code" text-anchor="middle">经验值 = CPU / 2</text>
+
+  <rect x="290" y="280" width="180" height="90" rx="6" class="opt-box"/>
+  <text x="380" y="302" class="t-md" text-anchor="middle" font-weight="600">persistent_workers</text>
+  <text x="380" y="322" class="t-sm t-mute" text-anchor="middle">避免 epoch 间重建</text>
+  <text x="380" y="340" class="t-code" text-anchor="middle">救 ② 的冷启动</text>
+  <text x="380" y="358" class="t-code" text-anchor="middle">省 fork + import</text>
+
+  <rect x="530" y="280" width="180" height="90" rx="6" class="opt-green"/>
+  <text x="620" y="302" class="t-md" text-anchor="middle" font-weight="600">pin_memory=True</text>
+  <text x="620" y="322" class="t-sm t-mute" text-anchor="middle">直接落 pinned 页</text>
+  <text x="620" y="340" class="t-code" text-anchor="middle">救 ③</text>
+  <text x="620" y="358" class="t-code" text-anchor="middle">少一次 CPU 拷贝</text>
+
+  <rect x="770" y="280" width="180" height="90" rx="6" class="opt-green"/>
+  <text x="860" y="302" class="t-md" text-anchor="middle" font-weight="600">non_blocking=True</text>
+  <text x="860" y="322" class="t-sm t-mute" text-anchor="middle">异步 DMA</text>
+  <text x="860" y="340" class="t-code" text-anchor="middle">救 ④</text>
+  <text x="860" y="358" class="t-code" text-anchor="middle">与 ⑤ overlap</text>
+
+  <rect x="1010" y="280" width="150" height="90" rx="6" class="opt-box"/>
+  <text x="1085" y="302" class="t-md" text-anchor="middle" font-weight="600">prefetch_factor</text>
+  <text x="1085" y="322" class="t-sm t-mute" text-anchor="middle">预取 N 个 batch</text>
+  <text x="1085" y="340" class="t-code" text-anchor="middle">救整条线</text>
+  <text x="1085" y="358" class="t-code" text-anchor="middle">默认 2 · 够用</text>
+
+  <!-- dashed connector callouts to stages -->
+  <path d="M 140 280 L 140 225" stroke="#c4a057" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+  <path d="M 380 280 L 380 225" stroke="#c4a057" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+  <path d="M 620 280 L 620 225" stroke="#7eb485" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+  <path d="M 860 280 L 860 225" stroke="#7eb485" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+  <path d="M 1085 280 L 1085 225" stroke="#c4a057" stroke-width="1.2" stroke-dasharray="3,3" fill="none"/>
+
+  <!-- Diagnostic section -->
+  <rect x="40" y="410" width="1120" height="180" rx="8" fill="#f2efe6" stroke="#d9d4c3"/>
+  <text x="56" y="436" class="t-lg">怎么判断瓶颈在哪一段</text>
+
+  <text x="56" y="466" class="t-md" font-weight="600">① + ②</text>
+  <text x="140" y="466" class="t-sm t-mute">iostat 看磁盘 %util · htop 看 DataLoader worker 是否吃满 CPU</text>
+
+  <text x="56" y="490" class="t-md" font-weight="600">③</text>
+  <text x="140" y="490" class="t-sm t-mute">罕见 · 除非你 batch 特别大 · 一般可忽略</text>
+
+  <text x="56" y="514" class="t-md" font-weight="600">④</text>
+  <text x="140" y="514" class="t-sm t-mute">nvidia-smi dmon 看 PCIe TX · 若 &gt;25 GB/s 持续 → 真瓶颈 · 开 non_blocking</text>
+
+  <text x="56" y="538" class="t-md accent">⑤</text>
+  <text x="140" y="538" class="t-sm t-mute">nvidia-smi 的 GPU-Util · 持续 &gt;95% 且上述全满 → 换更大卡 · 否则前面还有戏</text>
+
+  <line x1="56" y1="556" x2="1144" y2="556" stroke="#d9d4c3" stroke-dasharray="3,3"/>
+  <text x="56" y="578" class="t-sm"><tspan font-weight="600">反直觉</tspan><tspan class="t-mute"> · num_workers 不是越大越好 · 超过 CPU 核数会 context switch 打架 · 数据集小文件多时还会让 page cache 失效</tspan></text>
+</svg>

@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .bg{fill:#fafaf7}
+      .panel{fill:#f2efe6;stroke:#d9d4c3;stroke-width:1}
+      .panel-p0{fill:#fff5ea;stroke:#e8b98b;stroke-width:1.2}
+      .panel-p1{fill:#f2efe6;stroke:#cfc8b3;stroke-width:1.2}
+      .panel-p2{fill:#ecece8;stroke:#cfcbbc;stroke-width:1}
+      .title{fill:#1f1f1f;font-weight:600}
+      .sub{fill:#6b6659}
+      .tag{fill:#8a6a3e}
+      .tag-p1{fill:#5b6b7d}
+      .tag-p2{fill:#7a786c}
+      .card-title{fill:#2a2a2a;font-weight:600}
+      .card-desc{fill:#6d6658}
+      .mono-sm{font-size:11px}
+      .mono-md{font-size:13px}
+      .mono-lg{font-size:15px}
+      .accent-r{fill:#c76b5e}
+      .accent-b{fill:#5b7db1}
+      .accent-g{fill:#6a9955}
+    </style>
+  </defs>
+
+  <rect class="bg" width="1200" height="675"/>
+
+  <!-- Header bar -->
+  <text x="60" y="58" class="title" font-size="26">AI Infra 视角下的 OS 学习地图</text>
+  <text x="60" y="84" class="sub" font-size="13">从训练 / 推理系统里真正踩过的坑 · 倒推回 OS 原理 · 共 9 篇</text>
+
+  <!-- faint separator -->
+  <line x1="60" y1="104" x2="1140" y2="104" stroke="#d9d4c3" stroke-width="1"/>
+
+  <!-- P0 tier label -->
+  <rect x="40" y="128" width="72" height="22" rx="4" fill="#e8b98b" opacity="0.25"/>
+  <text x="48" y="144" class="tag mono-md" font-weight="600">P0 必须深挖</text>
+  <text x="124" y="144" class="sub mono-md">· 直接决定性能的那一层</text>
+
+  <!-- P0 cards: 4 × 260 wide, gap 20, start x=40 -->
+  <!-- card 1 -->
+  <rect x="40" y="162" width="260" height="138" rx="6" class="panel-p0"/>
+  <text x="56" y="188" class="card-title mono-lg">01 · 虚拟内存 &amp; TLB</text>
+  <text x="56" y="212" class="card-desc mono-md">分页 · HugePage · NUMA</text>
+  <line x1="56" y1="226" x2="284" y2="226" stroke="#e8d3b5" stroke-width="1"/>
+  <text x="56" y="246" class="accent-r mono-sm">AI 锚点</text>
+  <text x="56" y="264" class="card-desc mono-sm">pin_memory · RDMA 注册内存</text>
+  <text x="56" y="280" class="card-desc mono-sm">NUMA 跨 socket 访存代价</text>
+
+  <!-- card 2 -->
+  <rect x="320" y="162" width="260" height="138" rx="6" class="panel-p0"/>
+  <text x="336" y="188" class="card-title mono-lg">02 · 进程 / 线程 / cgroup</text>
+  <text x="336" y="212" class="card-desc mono-md">CFS · 上下文切换 · GIL</text>
+  <line x1="336" y1="226" x2="564" y2="226" stroke="#e8d3b5" stroke-width="1"/>
+  <text x="336" y="246" class="accent-r mono-sm">AI 锚点</text>
+  <text x="336" y="264" class="card-desc mono-sm">docker --cpus / --memory</text>
+  <text x="336" y="280" class="card-desc mono-sm">num_workers · k8s OOMKill</text>
+
+  <!-- card 3 -->
+  <rect x="600" y="162" width="260" height="138" rx="6" class="panel-p0"/>
+  <text x="616" y="188" class="card-title mono-lg">03 · I/O 底层</text>
+  <text x="616" y="212" class="card-desc mono-md">零拷贝 · Page Cache · io_uring</text>
+  <line x1="616" y1="226" x2="844" y2="226" stroke="#e8d3b5" stroke-width="1"/>
+  <text x="616" y="246" class="accent-r mono-sm">AI 锚点</text>
+  <text x="616" y="264" class="card-desc mono-sm">DataLoader pipeline 瓶颈</text>
+  <text x="616" y="280" class="card-desc mono-sm">checkpoint save 为啥卡 10 秒</text>
+
+  <!-- card 4 -->
+  <rect x="880" y="162" width="260" height="138" rx="6" class="panel-p0"/>
+  <text x="896" y="188" class="card-title mono-lg">04 · 网络 &amp; RDMA</text>
+  <text x="896" y="212" class="card-desc mono-md">TCP · epoll · kernel bypass</text>
+  <line x1="896" y1="226" x2="1124" y2="226" stroke="#e8d3b5" stroke-width="1"/>
+  <text x="896" y="246" class="accent-r mono-sm">AI 锚点</text>
+  <text x="896" y="264" class="card-desc mono-sm">NCCL · ring AllReduce</text>
+  <text x="896" y="280" class="card-desc mono-sm">gRPC / Triton 服务端模型</text>
+
+  <!-- P1 tier label -->
+  <rect x="40" y="330" width="72" height="22" rx="4" fill="#5b7db1" opacity="0.18"/>
+  <text x="48" y="346" class="tag-p1 mono-md" font-weight="600">P1 要理解</text>
+  <text x="124" y="346" class="sub mono-md">· 面试高频 + 原理题</text>
+
+  <!-- P1 cards -->
+  <rect x="40" y="364" width="260" height="120" rx="6" class="panel-p1"/>
+  <text x="56" y="390" class="card-title mono-lg">05 · 中断 &amp; syscall</text>
+  <text x="56" y="414" class="card-desc mono-md">用户态 / 内核态切换</text>
+  <line x1="56" y1="428" x2="284" y2="428" stroke="#d9d4c3" stroke-width="1"/>
+  <text x="56" y="448" class="accent-b mono-sm">为啥频繁小 I/O 慢</text>
+  <text x="56" y="466" class="card-desc mono-sm">一次 syscall ≈ 数百 ns</text>
+
+  <rect x="320" y="364" width="260" height="120" rx="6" class="panel-p1"/>
+  <text x="336" y="390" class="card-title mono-lg">06 · 文件系统 &amp; inode</text>
+  <text x="336" y="414" class="card-desc mono-md">ext4 · 硬/软链接 · mmap</text>
+  <line x1="336" y1="428" x2="564" y2="428" stroke="#d9d4c3" stroke-width="1"/>
+  <text x="336" y="448" class="accent-b mono-sm">小文件地狱 vs LMDB</text>
+  <text x="336" y="466" class="card-desc mono-sm">数据集为啥要打包</text>
+
+  <rect x="600" y="364" width="260" height="120" rx="6" class="panel-p1"/>
+  <text x="616" y="390" class="card-title mono-lg">07 · 锁 &amp; 无锁 &amp; RCU</text>
+  <text x="616" y="414" class="card-desc mono-md">自旋 · 互斥 · 读写 · 原子</text>
+  <line x1="616" y1="428" x2="844" y2="428" stroke="#d9d4c3" stroke-width="1"/>
+  <text x="616" y="448" class="accent-b mono-sm">读多写少场景</text>
+  <text x="616" y="466" class="card-desc mono-sm">C++ atomic in kernel</text>
+
+  <rect x="880" y="364" width="260" height="120" rx="6" class="panel-p1"/>
+  <text x="896" y="390" class="card-title mono-lg">08 · 信号 &amp; IPC</text>
+  <text x="896" y="414" class="card-desc mono-md">pipe · shm · msg queue</text>
+  <line x1="896" y1="428" x2="1124" y2="428" stroke="#d9d4c3" stroke-width="1"/>
+  <text x="896" y="448" class="accent-b mono-sm">torch.multiprocessing</text>
+  <text x="896" y="466" class="card-desc mono-sm">SIGKILL vs SIGTERM</text>
+
+  <!-- P2 tier label -->
+  <rect x="40" y="510" width="72" height="22" rx="4" fill="#a8a595" opacity="0.28"/>
+  <text x="48" y="526" class="tag-p2 mono-md" font-weight="600">P2 知道就行</text>
+  <text x="124" y="526" class="sub mono-md">· ROI 偏低 · 合集处理</text>
+
+  <rect x="40" y="544" width="540" height="80" rx="6" class="panel-p2"/>
+  <text x="56" y="570" class="card-title mono-lg">09 · OS 边角料合集</text>
+  <text x="56" y="594" class="card-desc mono-md">BIOS · 启动流程 · 硬件细节 · 面试速查</text>
+  <text x="56" y="614" class="sub mono-sm">一篇清扫完 · 收尾</text>
+
+  <!-- right side note box -->
+  <rect x="600" y="544" width="540" height="80" rx="6" fill="#f8f5ec" stroke="#d9d4c3" stroke-width="1"/>
+  <text x="616" y="570" class="card-title mono-md">写作铁律</text>
+  <text x="616" y="590" class="card-desc mono-sm">1. 不写「首先/其次/综上所述」 &#8226; 2. 敢下结论 &#8226; 3. 举具体名字</text>
+  <text x="616" y="608" class="card-desc mono-sm">场景 · 数字 · 历史锚点 · 可验证命令</text>
+
+  <!-- footer -->
+  <text x="60" y="654" class="sub mono-sm">suxin@site ~ $ series/ai-infra-os · 9 posts · ~35k words</text>
+  <text x="1140" y="654" class="sub mono-sm" text-anchor="end">v1.0 · 2026</text>
+</svg>

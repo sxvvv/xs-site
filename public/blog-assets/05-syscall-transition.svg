@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 660" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .bg{fill:#fafaf7}
+      .title{fill:#1f1f1f;font-weight:600}
+      .sub{fill:#6b6659}
+      .lane-u{fill:#fff5ea;stroke:#d4a070;stroke-width:1.2}
+      .lane-k{fill:#eef3f8;stroke:#5b7db1;stroke-width:1.2}
+      .t-sm{font-size:11px;fill:#2a2a2a}
+      .t-md{font-size:13px;fill:#2a2a2a}
+      .t-lg{font-size:15px;fill:#2a2a2a;font-weight:600}
+      .t-mute{fill:#7a7466}
+      .t-code{font-size:11px;fill:#5b6b7d}
+      .lane-label{fill:#1f1f1f;font-weight:700;font-size:15px}
+      .exec-bar{fill:#d4a070;opacity:0.85}
+      .exec-bar-k{fill:#5b7db1;opacity:0.85}
+      .transition{stroke:#c76b5e;stroke-width:2;fill:none;stroke-dasharray:4,3}
+    </style>
+    <marker id="a05" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c76b5e"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="660"/>
+
+  <text x="40" y="40" class="title" font-size="20">一次 read() 系统调用的两段式时序</text>
+  <text x="40" y="62" class="sub" font-size="12">用户态 / 内核态各自的工作 · 翻越栅栏的代价</text>
+
+  <!-- User mode lane -->
+  <rect x="60" y="100" width="1080" height="130" rx="6" class="lane-u"/>
+  <text x="78" y="128" class="lane-label" fill="#8a5a2a">ring 3 · 用户态</text>
+  <text x="78" y="146" class="t-code">权限受限 · 只能访问自己的虚拟地址空间</text>
+
+  <rect x="100" y="170" width="260" height="36" rx="3" class="exec-bar"/>
+  <text x="230" y="193" class="t-sm" text-anchor="middle" fill="#3a2a10" font-weight="600">app code · buf 准备</text>
+
+  <rect x="960" y="170" width="160" height="36" rx="3" class="exec-bar"/>
+  <text x="1040" y="193" class="t-sm" text-anchor="middle" fill="#3a2a10" font-weight="600">处理返回 · 继续</text>
+
+  <!-- Kernel mode lane -->
+  <rect x="60" y="310" width="1080" height="130" rx="6" class="lane-k"/>
+  <text x="78" y="338" class="lane-label" fill="#2a4a7a">ring 0 · 内核态</text>
+  <text x="78" y="356" class="t-code">完整权限 · 访问硬件 / 所有物理内存</text>
+
+  <rect x="500" y="380" width="320" height="36" rx="3" class="exec-bar-k"/>
+  <text x="660" y="403" class="t-sm" text-anchor="middle" fill="#ffffff" font-weight="600">VFS → ext4 → 块层 → 驱动 · 实际读盘</text>
+
+  <!-- Transition arrows -->
+  <path d="M 360 206 L 500 380" class="transition" marker-end="url(#a05)"/>
+  <path d="M 820 380 L 960 206" class="transition" marker-end="url(#a05)"/>
+
+  <rect x="370" y="245" width="130" height="44" rx="4" fill="#fff3f0" stroke="#c76b5e" stroke-width="1"/>
+  <text x="435" y="263" class="t-sm" text-anchor="middle" font-weight="600">进内核</text>
+  <text x="435" y="279" class="t-code" text-anchor="middle" fill="#c76b5e">~100–300 ns</text>
+
+  <rect x="820" y="245" width="130" height="44" rx="4" fill="#fff3f0" stroke="#c76b5e" stroke-width="1"/>
+  <text x="885" y="263" class="t-sm" text-anchor="middle" font-weight="600">回用户</text>
+  <text x="885" y="279" class="t-code" text-anchor="middle" fill="#c76b5e">~100–300 ns</text>
+
+  <!-- Timeline axis -->
+  <line x1="100" y1="470" x2="1140" y2="470" stroke="#7a7466" stroke-width="1.2"/>
+  <text x="1150" y="474" class="t-sm t-mute">time →</text>
+  <g stroke="#7a7466" stroke-width="0.8">
+    <line x1="100" y1="468" x2="100" y2="476"/>
+    <line x1="360" y1="468" x2="360" y2="476"/>
+    <line x1="500" y1="468" x2="500" y2="476"/>
+    <line x1="820" y1="468" x2="820" y2="476"/>
+    <line x1="960" y1="468" x2="960" y2="476"/>
+    <line x1="1140" y1="468" x2="1140" y2="476"/>
+  </g>
+  <text x="230" y="492" class="t-sm t-mute" text-anchor="middle">用户态逻辑</text>
+  <text x="430" y="492" class="t-sm t-mute" text-anchor="middle">syscall 入口</text>
+  <text x="660" y="492" class="t-sm t-mute" text-anchor="middle">内核做实际 I/O</text>
+  <text x="890" y="492" class="t-sm t-mute" text-anchor="middle">syscall 返回</text>
+  <text x="1040" y="492" class="t-sm t-mute" text-anchor="middle">用户态继续</text>
+
+  <!-- Info panel: below, horizontal -->
+  <rect x="40" y="520" width="720" height="120" rx="6" fill="#fff9ee" stroke="#e0c585"/>
+  <text x="58" y="544" class="t-md" font-weight="600">翻栅栏到底干了啥</text>
+  <line x1="58" y1="554" x2="742" y2="554" stroke="#e0c585"/>
+  <text x="58" y="574" class="t-code">· 保存通用寄存器 + RFLAGS + RIP</text>
+  <text x="58" y="592" class="t-code">· 切换 CR3（页表根）→ TLB 部分刷新</text>
+  <text x="400" y="574" class="t-code">· 切栈（用户栈 → 内核栈）</text>
+  <text x="400" y="592" class="t-code">· 查 syscall table · 跳到 sys_read</text>
+  <text x="58" y="624" class="t-sm" fill="#c76b5e" font-weight="600">代价 = 固定开销 · 与 payload 大小无关</text>
+
+  <rect x="780" y="520" width="380" height="120" rx="6" fill="#f2efe6" stroke="#d9d4c3"/>
+  <text x="798" y="544" class="t-md" font-weight="600">推论</text>
+  <line x1="798" y1="554" x2="1142" y2="554" stroke="#d9d4c3"/>
+  <text x="798" y="574" class="t-code">每读 1 字节就 syscall</text>
+  <text x="798" y="590" class="t-code">→ 被固定开销吃死</text>
+  <text x="798" y="610" class="t-code">所以 · fread 带 buffer · io_uring</text>
+  <text x="798" y="626" class="t-code">要 batch · epoll 省得重复进核</text>
+</svg>

@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .bg{fill:#fafaf7}
+      .title{fill:#1f1f1f;font-weight:600}
+      .sub{fill:#6b6659}
+      .gpu{fill:#eef3f8;stroke:#5b7db1;stroke-width:1.6}
+      .gpu-label{fill:#1f1f1f;font-weight:700;font-size:16px}
+      .chunk-a{fill:#f5c4b2}
+      .chunk-b{fill:#c7e0b5}
+      .chunk-c{fill:#b5cfe8}
+      .chunk-d{fill:#e0c5e8}
+      .chunk-stroke{stroke:#7a7466;stroke-width:0.8}
+      .t-sm{font-size:11px;fill:#2a2a2a}
+      .t-md{font-size:13px;fill:#2a2a2a}
+      .t-lg{font-size:15px;fill:#2a2a2a;font-weight:600}
+      .t-mute{fill:#7a7466}
+      .t-code{font-size:11px;fill:#5b6b7d}
+      .ring-arrow{stroke:#c76b5e;stroke-width:2;fill:none}
+      .phase-label{fill:#1f1f1f;font-weight:600;font-size:14px}
+      .lane-box{fill:#f2efe6;stroke:#d9d4c3;stroke-width:1}
+    </style>
+    <marker id="a04" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c76b5e"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="680"/>
+
+  <text x="40" y="40" class="title" font-size="20">Ring AllReduce · 4 卡拓扑</text>
+  <text x="40" y="62" class="sub" font-size="12">scatter-reduce + all-gather 两阶段 · 每张卡只和邻居说话 · 带宽随 N 无限扩展</text>
+
+  <!-- Left: ring topology -->
+  <text x="90" y="100" class="phase-label">拓扑</text>
+
+  <!-- 4 GPUs in a diamond -->
+  <!-- GPU 0 top -->
+  <rect x="230" y="130" width="120" height="70" rx="8" class="gpu"/>
+  <text x="290" y="162" class="gpu-label" text-anchor="middle">GPU 0</text>
+  <text x="290" y="182" class="t-code" text-anchor="middle">rank 0</text>
+
+  <!-- GPU 1 right -->
+  <rect x="400" y="280" width="120" height="70" rx="8" class="gpu"/>
+  <text x="460" y="312" class="gpu-label" text-anchor="middle">GPU 1</text>
+  <text x="460" y="332" class="t-code" text-anchor="middle">rank 1</text>
+
+  <!-- GPU 2 bottom -->
+  <rect x="230" y="430" width="120" height="70" rx="8" class="gpu"/>
+  <text x="290" y="462" class="gpu-label" text-anchor="middle">GPU 2</text>
+  <text x="290" y="482" class="t-code" text-anchor="middle">rank 2</text>
+
+  <!-- GPU 3 left -->
+  <rect x="60" y="280" width="120" height="70" rx="8" class="gpu"/>
+  <text x="120" y="312" class="gpu-label" text-anchor="middle">GPU 3</text>
+  <text x="120" y="332" class="t-code" text-anchor="middle">rank 3</text>
+
+  <!-- Ring arrows: 0->1 -> 2 -> 3 -> 0 -->
+  <path d="M 350 180 Q 430 220 420 278" class="ring-arrow" marker-end="url(#a04)"/>
+  <path d="M 440 350 Q 410 420 352 450" class="ring-arrow" marker-end="url(#a04)"/>
+  <path d="M 230 460 Q 150 420 158 352" class="ring-arrow" marker-end="url(#a04)"/>
+  <path d="M 180 300 Q 210 220 228 178" class="ring-arrow" marker-end="url(#a04)"/>
+
+  <!-- bandwidth annotation -->
+  <text x="290" y="545" class="t-sm t-mute" text-anchor="middle">NVLink / IB / RoCE</text>
+  <text x="290" y="562" class="t-sm t-mute" text-anchor="middle">每条边 ~50 GB/s</text>
+
+  <!-- Right: Data flow timeline -->
+  <rect x="570" y="90" width="600" height="260" rx="8" class="lane-box"/>
+  <text x="586" y="114" class="phase-label">① scatter-reduce · (N-1) 步</text>
+  <text x="586" y="134" class="t-sm t-mute">每卡把自己的 chunk 往下游送 · 下游累加后再往下送</text>
+
+  <!-- 4 rows of 4 chunks, initial then step 1 then step 2 then final -->
+  <!-- Initial row: each GPU owns full gradient split into 4 chunks A B C D -->
+  <text x="586" y="164" class="t-code" font-weight="600">初始 · 每卡持有完整 4 chunk</text>
+
+  <!-- draw 4x4 chunk grid -->
+  <g transform="translate(586,170)">
+    <!-- header row -->
+    <text x="0" y="14" class="t-code">GPU 0</text>
+    <text x="0" y="36" class="t-code">GPU 1</text>
+    <text x="0" y="58" class="t-code">GPU 2</text>
+    <text x="0" y="80" class="t-code">GPU 3</text>
+    <!-- chunks per row -->
+    <!-- row 0 -->
+    <rect x="60" y="2" width="28" height="16" class="chunk-a chunk-stroke"/>
+    <rect x="92" y="2" width="28" height="16" class="chunk-b chunk-stroke"/>
+    <rect x="124" y="2" width="28" height="16" class="chunk-c chunk-stroke"/>
+    <rect x="156" y="2" width="28" height="16" class="chunk-d chunk-stroke"/>
+    <!-- row 1 -->
+    <rect x="60" y="24" width="28" height="16" class="chunk-a chunk-stroke"/>
+    <rect x="92" y="24" width="28" height="16" class="chunk-b chunk-stroke"/>
+    <rect x="124" y="24" width="28" height="16" class="chunk-c chunk-stroke"/>
+    <rect x="156" y="24" width="28" height="16" class="chunk-d chunk-stroke"/>
+    <!-- row 2 -->
+    <rect x="60" y="46" width="28" height="16" class="chunk-a chunk-stroke"/>
+    <rect x="92" y="46" width="28" height="16" class="chunk-b chunk-stroke"/>
+    <rect x="124" y="46" width="28" height="16" class="chunk-c chunk-stroke"/>
+    <rect x="156" y="46" width="28" height="16" class="chunk-d chunk-stroke"/>
+    <!-- row 3 -->
+    <rect x="60" y="68" width="28" height="16" class="chunk-a chunk-stroke"/>
+    <rect x="92" y="68" width="28" height="16" class="chunk-b chunk-stroke"/>
+    <rect x="124" y="68" width="28" height="16" class="chunk-c chunk-stroke"/>
+    <rect x="156" y="68" width="28" height="16" class="chunk-d chunk-stroke"/>
+    <!-- chunk letter labels under header -->
+    <text x="74" y="102" class="t-code" text-anchor="middle">a</text>
+    <text x="106" y="102" class="t-code" text-anchor="middle">b</text>
+    <text x="138" y="102" class="t-code" text-anchor="middle">c</text>
+    <text x="170" y="102" class="t-code" text-anchor="middle">d</text>
+  </g>
+
+  <!-- Step 3 column: after scatter-reduce each GPU has 1 fully-reduced chunk -->
+  <text x="880" y="164" class="t-code" font-weight="600">3 步之后 · 每卡持有 1 个完整归约的 chunk</text>
+
+  <g transform="translate(880,170)">
+    <text x="0" y="14" class="t-code">GPU 0</text>
+    <text x="0" y="36" class="t-code">GPU 1</text>
+    <text x="0" y="58" class="t-code">GPU 2</text>
+    <text x="0" y="80" class="t-code">GPU 3</text>
+    <!-- highlight owned chunk with full color, others faded -->
+    <!-- GPU 0 owns chunk a (full), b c d faded -->
+    <rect x="60" y="2" width="28" height="16" class="chunk-a chunk-stroke"/>
+    <rect x="60" y="2" width="28" height="16" fill="#1f1f1f" opacity="0"/>
+    <text x="74" y="14" class="t-code" text-anchor="middle" font-weight="700">Σa</text>
+    <rect x="92" y="2" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+    <rect x="124" y="2" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+    <rect x="156" y="2" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+
+    <rect x="60" y="24" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+    <rect x="92" y="24" width="28" height="16" class="chunk-b chunk-stroke"/>
+    <text x="106" y="36" class="t-code" text-anchor="middle" font-weight="700">Σb</text>
+    <rect x="124" y="24" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+    <rect x="156" y="24" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+
+    <rect x="60" y="46" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+    <rect x="92" y="46" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+    <rect x="124" y="46" width="28" height="16" class="chunk-c chunk-stroke"/>
+    <text x="138" y="58" class="t-code" text-anchor="middle" font-weight="700">Σc</text>
+    <rect x="156" y="46" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+
+    <rect x="60" y="68" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+    <rect x="92" y="68" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+    <rect x="124" y="68" width="28" height="16" fill="#e8e5dc" stroke="#d9d4c3" stroke-width="0.8"/>
+    <rect x="156" y="68" width="28" height="16" class="chunk-d chunk-stroke"/>
+    <text x="170" y="80" class="t-code" text-anchor="middle" font-weight="700">Σd</text>
+  </g>
+
+  <text x="586" y="315" class="t-sm t-mute">灰格 = 该卡本地已失效的 chunk · 彩格 Σx = 跨 4 卡求和后的完整 chunk</text>
+
+  <!-- Phase 2: all-gather -->
+  <rect x="570" y="370" width="600" height="260" rx="8" class="lane-box"/>
+  <text x="586" y="394" class="phase-label">② all-gather · 再 (N-1) 步</text>
+  <text x="586" y="414" class="t-sm t-mute">每卡把自己的 Σx 沿环传一圈 · 传完所有卡都有 Σa, Σb, Σc, Σd</text>
+
+  <!-- final state table -->
+  <text x="586" y="444" class="t-code" font-weight="600">最终 · 所有卡一致</text>
+  <g transform="translate(586,450)">
+    <text x="0" y="14" class="t-code">GPU 0</text>
+    <text x="0" y="36" class="t-code">GPU 1</text>
+    <text x="0" y="58" class="t-code">GPU 2</text>
+    <text x="0" y="80" class="t-code">GPU 3</text>
+    <!-- all rows same: Σa Σb Σc Σd -->
+    <g>
+      <rect x="60" y="2" width="28" height="16" class="chunk-a chunk-stroke"/><text x="74" y="14" class="t-code" text-anchor="middle" font-weight="700">Σa</text>
+      <rect x="92" y="2" width="28" height="16" class="chunk-b chunk-stroke"/><text x="106" y="14" class="t-code" text-anchor="middle" font-weight="700">Σb</text>
+      <rect x="124" y="2" width="28" height="16" class="chunk-c chunk-stroke"/><text x="138" y="14" class="t-code" text-anchor="middle" font-weight="700">Σc</text>
+      <rect x="156" y="2" width="28" height="16" class="chunk-d chunk-stroke"/><text x="170" y="14" class="t-code" text-anchor="middle" font-weight="700">Σd</text>
+
+      <rect x="60" y="24" width="28" height="16" class="chunk-a chunk-stroke"/><text x="74" y="36" class="t-code" text-anchor="middle" font-weight="700">Σa</text>
+      <rect x="92" y="24" width="28" height="16" class="chunk-b chunk-stroke"/><text x="106" y="36" class="t-code" text-anchor="middle" font-weight="700">Σb</text>
+      <rect x="124" y="24" width="28" height="16" class="chunk-c chunk-stroke"/><text x="138" y="36" class="t-code" text-anchor="middle" font-weight="700">Σc</text>
+      <rect x="156" y="24" width="28" height="16" class="chunk-d chunk-stroke"/><text x="170" y="36" class="t-code" text-anchor="middle" font-weight="700">Σd</text>
+
+      <rect x="60" y="46" width="28" height="16" class="chunk-a chunk-stroke"/><text x="74" y="58" class="t-code" text-anchor="middle" font-weight="700">Σa</text>
+      <rect x="92" y="46" width="28" height="16" class="chunk-b chunk-stroke"/><text x="106" y="58" class="t-code" text-anchor="middle" font-weight="700">Σb</text>
+      <rect x="124" y="46" width="28" height="16" class="chunk-c chunk-stroke"/><text x="138" y="58" class="t-code" text-anchor="middle" font-weight="700">Σc</text>
+      <rect x="156" y="46" width="28" height="16" class="chunk-d chunk-stroke"/><text x="170" y="58" class="t-code" text-anchor="middle" font-weight="700">Σd</text>
+
+      <rect x="60" y="68" width="28" height="16" class="chunk-a chunk-stroke"/><text x="74" y="80" class="t-code" text-anchor="middle" font-weight="700">Σa</text>
+      <rect x="92" y="68" width="28" height="16" class="chunk-b chunk-stroke"/><text x="106" y="80" class="t-code" text-anchor="middle" font-weight="700">Σb</text>
+      <rect x="124" y="68" width="28" height="16" class="chunk-c chunk-stroke"/><text x="138" y="80" class="t-code" text-anchor="middle" font-weight="700">Σc</text>
+      <rect x="156" y="68" width="28" height="16" class="chunk-d chunk-stroke"/><text x="170" y="80" class="t-code" text-anchor="middle" font-weight="700">Σd</text>
+    </g>
+  </g>
+
+  <!-- cost box -->
+  <rect x="820" y="448" width="340" height="170" rx="6" fill="#fff9ee" stroke="#e0c585"/>
+  <text x="838" y="472" class="t-md" font-weight="600">通信量计算</text>
+  <line x1="838" y1="482" x2="1142" y2="482" stroke="#e0c585"/>
+  <text x="838" y="502" class="t-code">单卡发 · 2(N-1)/N · 参数量</text>
+  <text x="838" y="522" class="t-code">与 N 无关渐近 → 2 · 参数量</text>
+  <line x1="838" y1="534" x2="1142" y2="534" stroke="#e0c585" stroke-dasharray="3,3"/>
+  <text x="838" y="554" class="t-code">对比 · parameter server</text>
+  <text x="838" y="574" class="t-code">master 带宽 = N · 参数量</text>
+  <text x="838" y="594" class="t-sm" fill="#c76b5e" font-weight="600">Ring 胜在：带宽 O(1)，不堵中心</text>
+
+  <!-- bottom -->
+  <rect x="40" y="638" width="1120" height="32" rx="6" fill="#f2efe6" stroke="#d9d4c3"/>
+  <text x="56" y="659" class="t-sm"><tspan font-weight="600">实际</tspan><tspan class="t-mute"> · NCCL 在多机多卡上会退化成 tree 或 double binary tree · ring 只是最小模型</tspan></text>
+</svg>

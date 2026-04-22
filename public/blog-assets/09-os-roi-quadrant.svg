@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+  <defs>
+    <style>
+      .bg{fill:#fafaf7}
+      .title{fill:#1f1f1f;font-weight:600}
+      .sub{fill:#6b6659}
+      .axis{stroke:#7a7466;stroke-width:1.4;fill:none}
+      .grid{stroke:#d9d4c3;stroke-width:0.6;fill:none;stroke-dasharray:2,3}
+      .q-go{fill:#eef5ec;stroke:#7eb485;stroke-width:1}
+      .q-know{fill:#fff9ee;stroke:#e0c585;stroke-width:1}
+      .q-skip{fill:#f3f0e8;stroke:#b8b39e;stroke-width:1}
+      .dot-p0{fill:#c76b5e}
+      .dot-p1{fill:#5b7db1}
+      .dot-p2{fill:#a8a595}
+      .t-sm{font-size:11px;fill:#2a2a2a}
+      .t-md{font-size:13px;fill:#2a2a2a}
+      .t-lg{font-size:15px;fill:#2a2a2a;font-weight:600}
+      .t-mute{fill:#7a7466}
+      .t-code{font-size:11px;fill:#5b6b7d}
+      .q-label{fill:#1f1f1f;font-weight:700;font-size:14px;opacity:0.65}
+    </style>
+    <marker id="a09" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7a7466"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" width="1200" height="700"/>
+
+  <text x="40" y="40" class="title" font-size="20">OS 学习 ROI 象限图 · 投入产出比</text>
+  <text x="40" y="62" class="sub" font-size="12">横轴 · 实际工作中触碰频率 · 纵轴 · 需要掌握的深度</text>
+
+  <!-- 4 quadrants -->
+  <rect x="120" y="120" width="460" height="260" class="q-go"/>
+  <rect x="580" y="120" width="460" height="260" class="q-go"/>
+  <rect x="120" y="380" width="460" height="220" class="q-skip"/>
+  <rect x="580" y="380" width="460" height="220" class="q-know"/>
+
+  <!-- Grid -->
+  <line x1="350" y1="120" x2="350" y2="600" class="grid"/>
+  <line x1="810" y1="120" x2="810" y2="600" class="grid"/>
+  <line x1="120" y1="250" x2="1040" y2="250" class="grid"/>
+  <line x1="120" y1="490" x2="1040" y2="490" class="grid"/>
+
+  <!-- Axes -->
+  <line x1="120" y1="600" x2="1040" y2="600" class="axis" marker-end="url(#a09)"/>
+  <line x1="120" y1="600" x2="120" y2="120" class="axis" marker-end="url(#a09)"/>
+
+  <text x="580" y="636" class="t-md t-mute" text-anchor="middle">← 工作中遇到的频率 →</text>
+  <text x="56" y="360" class="t-md t-mute" text-anchor="middle" transform="rotate(-90 56 360)">← 该懂多深 →</text>
+
+  <!-- Quadrant labels -->
+  <text x="350" y="140" class="q-label" text-anchor="middle" fill="#3a6a45">深挖 · 直接收益</text>
+  <text x="810" y="140" class="q-label" text-anchor="middle" fill="#3a6a45">深挖 · 高频必备</text>
+  <text x="350" y="400" class="q-label" text-anchor="middle" fill="#6b665a">了解原理即可跳过</text>
+  <text x="810" y="400" class="q-label" text-anchor="middle" fill="#a08040">面试高频 · 工作少用</text>
+
+  <!-- Top-right quadrant P0 dots (all labels end well inside x=1040) -->
+  <g transform="translate(640,180)">
+    <circle cx="0" cy="0" r="7" class="dot-p0"/>
+    <text x="12" y="4" class="t-md" font-weight="600">虚拟内存 / 分页</text>
+  </g>
+  <g transform="translate(640,220)">
+    <circle cx="0" cy="0" r="7" class="dot-p0"/>
+    <text x="12" y="4" class="t-md" font-weight="600">TCP / epoll / RDMA</text>
+  </g>
+  <g transform="translate(640,260)">
+    <circle cx="0" cy="0" r="7" class="dot-p0"/>
+    <text x="12" y="4" class="t-md" font-weight="600">cgroup / 容器</text>
+  </g>
+  <g transform="translate(640,300)">
+    <circle cx="0" cy="0" r="7" class="dot-p0"/>
+    <text x="12" y="4" class="t-md" font-weight="600">I/O · Page Cache</text>
+  </g>
+  <g transform="translate(640,340)">
+    <circle cx="0" cy="0" r="6" class="dot-p0"/>
+    <text x="12" y="4" class="t-md">HugePage / NUMA</text>
+  </g>
+  <g transform="translate(860,220)">
+    <circle cx="0" cy="0" r="6" class="dot-p0"/>
+    <text x="12" y="4" class="t-md">io_uring</text>
+  </g>
+  <g transform="translate(860,280)">
+    <circle cx="0" cy="0" r="6" class="dot-p0"/>
+    <text x="12" y="4" class="t-md">零拷贝 / splice</text>
+  </g>
+
+  <!-- Top-left quadrant P1 dots -->
+  <g transform="translate(150,210)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">mmap 内部实现</text>
+  </g>
+  <g transform="translate(150,260)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">锁实现原理</text>
+  </g>
+  <g transform="translate(350,200)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">CPU 缓存一致性</text>
+  </g>
+  <g transform="translate(150,320)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">RCU</text>
+  </g>
+  <g transform="translate(380,340)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">NUMA 内部拓扑</text>
+  </g>
+
+  <!-- Bottom-right P1 dots (interview flavor) -->
+  <g transform="translate(610,430)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">进程 / 线程区别</text>
+  </g>
+  <g transform="translate(610,470)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">死锁四条件</text>
+  </g>
+  <g transform="translate(610,510)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">生产者 / 消费者</text>
+  </g>
+  <g transform="translate(610,550)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">CFS 调度细节</text>
+  </g>
+  <g transform="translate(850,440)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">文件锁 flock</text>
+  </g>
+  <g transform="translate(850,490)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">信号 · 异步安全</text>
+  </g>
+  <g transform="translate(850,540)">
+    <circle cx="0" cy="0" r="6" class="dot-p1"/>
+    <text x="12" y="4" class="t-md">select vs poll vs epoll</text>
+  </g>
+
+  <!-- Bottom-left P2 skip -->
+  <g transform="translate(150,440)">
+    <circle cx="0" cy="0" r="6" class="dot-p2"/>
+    <text x="12" y="4" class="t-md t-mute">BIOS / UEFI 启动</text>
+  </g>
+  <g transform="translate(150,490)">
+    <circle cx="0" cy="0" r="6" class="dot-p2"/>
+    <text x="12" y="4" class="t-md t-mute">设备驱动编写</text>
+  </g>
+  <g transform="translate(150,540)">
+    <circle cx="0" cy="0" r="6" class="dot-p2"/>
+    <text x="12" y="4" class="t-md t-mute">硬件中断控制器</text>
+  </g>
+  <g transform="translate(380,440)">
+    <circle cx="0" cy="0" r="6" class="dot-p2"/>
+    <text x="12" y="4" class="t-md t-mute">ACPI 电源管理</text>
+  </g>
+  <g transform="translate(380,500)">
+    <circle cx="0" cy="0" r="6" class="dot-p2"/>
+    <text x="12" y="4" class="t-md t-mute">实模式 / 保护模式</text>
+  </g>
+
+  <!-- Legend -->
+  <rect x="1060" y="120" width="125" height="130" rx="4" fill="#f2efe6" stroke="#d9d4c3"/>
+  <text x="1076" y="140" class="t-md" font-weight="600">图例</text>
+  <circle cx="1082" cy="164" r="6" class="dot-p0"/>
+  <text x="1096" y="168" class="t-sm">P0 · 本系列</text>
+  <circle cx="1082" cy="190" r="6" class="dot-p1"/>
+  <text x="1096" y="194" class="t-sm">P1 · 理解</text>
+  <circle cx="1082" cy="216" r="6" class="dot-p2"/>
+  <text x="1096" y="220" class="t-sm">P2 · 跳过</text>
+
+  <!-- Bottom summary -->
+  <rect x="40" y="640" width="1120" height="52" rx="6" fill="#fff9ee" stroke="#e0c585"/>
+  <text x="56" y="662" class="t-sm" font-weight="600">本系列的取舍</text>
+  <text x="56" y="682" class="t-sm t-mute">右上象限全部深挖（P0）· 左上和右下知其所以然（P1）· 左下合并一篇带过（P2）· 别被「OS 教科书目录完整性」绑架</text>
+</svg>

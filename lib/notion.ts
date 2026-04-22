@@ -63,7 +63,14 @@ export interface Note {
 /*  ─────────────── 博客列表 ─────────────── */
 
 export async function getPosts(): Promise<Post[]> {
-  if (!process.env.NOTION_BLOG_DATABASE_ID) return [];
+  if (!process.env.NOTION_TOKEN) {
+    console.warn("[notion] NOTION_TOKEN is not set — returning empty (site will render fallback).");
+    return [];
+  }
+  if (!process.env.NOTION_BLOG_DATABASE_ID) {
+    console.warn("[notion] NOTION_BLOG_DATABASE_ID is not set — returning empty.");
+    return [];
+  }
 
   const dbId = process.env.NOTION_BLOG_DATABASE_ID;
 
@@ -71,28 +78,43 @@ export async function getPosts(): Promise<Post[]> {
     return notion.databases.query({ database_id: dbId, ...opts });
   }
 
+  // 依次尝试: select 类型过滤 → status 类型过滤 → 不过滤(全部返回后自己挑)
   let res: any;
   try {
     res = await tryQuery({
       filter: { property: "Status", select: { equals: "Published" } },
       sorts: [{ property: "Date", direction: "descending" }],
     });
-  } catch {
+  } catch (e1: any) {
     try {
       res = await tryQuery({
-        filter: { property: "Status", select: { equals: "Published" } },
+        filter: { property: "Status", status: { equals: "Published" } },
+        sorts: [{ property: "Date", direction: "descending" }],
       });
-    } catch {
+    } catch (e2: any) {
       try {
         res = await tryQuery({});
-      } catch (err) {
-        console.error("[notion] getPosts failed:", err);
+      } catch (err: any) {
+        console.error("[notion] getPosts failed at all fallbacks:", {
+          select_err: e1?.body || e1?.message,
+          status_err: e2?.body || e2?.message,
+          plain_err: err?.body || err?.message,
+          hint: "check: 1) integration has Connections access to the blog DB, 2) DB ID is correct (32 hex chars), 3) token is not expired",
+        });
         return [];
       }
     }
   }
 
-  const posts = res.results.map((page: any) => {
+  const posts = res.results
+    .filter((page: any) => {
+      // fallback 路径可能拿到 Drafts,这里按 Status 再过滤一遍(兼容 select/status 两种类型)
+      const s = getProp(page.properties, "Status");
+      if (!s) return true; // 没 Status 列就全放行
+      const name = s.select?.name ?? s.status?.name;
+      return !name || name === "Published";
+    })
+    .map((page: any) => {
     const props = page.properties;
     const title = plainText(getProp(props, "Name")?.title) || "Untitled";
     const date =

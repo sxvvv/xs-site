@@ -95,6 +95,7 @@ cp .env.local.example .env.local
 NOTION_TOKEN=ntn_xxxxxxxxxxxx
 NOTION_BLOG_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 NOTION_NOTES_DATABASE_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+REVALIDATE_SECRET=pick-any-long-random-string
 ```
 
 Restart the dev server. Drafts are filtered out — only rows with `Status = Published` appear on the site.
@@ -103,12 +104,43 @@ Restart the dev server. Drafts are filtered out — only rows with `Status = Pub
 
 1. Push the repository to GitHub.
 2. Import the repo at <https://vercel.com>.
-3. Add `NOTION_TOKEN`, `NOTION_BLOG_DATABASE_ID`, and `NOTION_NOTES_DATABASE_ID` under **Environment Variables**.
+3. Add `NOTION_TOKEN`, `NOTION_BLOG_DATABASE_ID`, `NOTION_NOTES_DATABASE_ID`, and `REVALIDATE_SECRET` under **Environment Variables**.
 4. Deploy.
 
 To bind a custom domain, go to **Project Settings → Domains** and follow the CNAME instructions.
 
-Content refreshes automatically every 60 seconds (`export const revalidate = 60`). For immediate updates, trigger a redeploy from the Vercel dashboard.
+Content refreshes automatically every 60 seconds (`export const revalidate = 60`). For immediate updates after editing Notion, hit the on-demand revalidation endpoint (below) — no redeploy needed.
+
+### Live content refresh (on-demand)
+
+Route: `POST /api/revalidate` (also accepts `GET` for quick browser/curl testing).
+
+```bash
+# refresh everything
+curl -X POST https://<your-domain>/api/revalidate \
+  -H "x-revalidate-secret: $REVALIDATE_SECRET"
+
+# refresh only blog or only notes
+curl -X POST https://<your-domain>/api/revalidate \
+  -H "x-revalidate-secret: $REVALIDATE_SECRET" \
+  -H "content-type: application/json" \
+  -d '{"target":"blog"}'
+
+# browser-friendly GET (target optional: all|blog|notes)
+curl "https://<your-domain>/api/revalidate?secret=$REVALIDATE_SECRET&target=all"
+```
+
+Or, from the repo root:
+
+```bash
+node scripts/trigger-revalidate.mjs          # all
+node scripts/trigger-revalidate.mjs blog     # blog only
+node scripts/trigger-revalidate.mjs notes    # notes only
+```
+
+Wire this up to a Notion automation (page-edited → HTTP request), n8n / Zapier,
+or just bookmark the GET URL — the next visitor sees fresh content within a
+second of the call returning `{ok: true}`.
 
 ---
 

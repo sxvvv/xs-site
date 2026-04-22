@@ -21,3 +21,11 @@ yarn-debug.log*
 .vscode/
 .idea/
 next-env.d.ts
+tsconfig.tsbuildinfo
+
+# OMC (oh-my-claudecode) local state — never commit
+.omc/
+.claude/
+
+# local drafts (upload source for scripts/, not served)
+public/drafts/

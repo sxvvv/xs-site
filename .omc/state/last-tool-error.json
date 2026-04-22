@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd \\\"H:/downloads/nico-site/nico-site\\\" && git status 2>&1 | head -5; echo \\\"---\\\"; which gh 2>&1\",\"description\":\"Check git and gh CLI availability\"}",
-  "error": "Exit code 1\nfatal: not a git repository (or any of the parent directories): .git\n---\nwhich: no gh in (/c/Users/Administrator/bin:/mingw64/bin:/usr/local/bin:/usr/bin:/bin:/mingw64/bin:/usr/bin:/c/Users/Administrator/bin:/h/texlive/2026/bin/windows:/e/vm/vmware/bin:/c/Program Files/Common Files/Oracle/Java/javapath:/c/WINDOWS/system32:/c/WINDOWS:/c/WINDOWS/System32/Wbem:/c/WINDOWS/System32/WindowsPowerShell/v1.0:/c/WINDOWS/System32/OpenSSH:/h/anaconda3:/h/anaconda3/Scripts:/h/anaconda3/Library/bi...",
-  "timestamp": "2026-04-21T09:04:52.972Z",
-  "retry_count": 1
-}

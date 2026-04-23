@@ -57,3 +57,24 @@ export const SITE = {
     },
   ],
 } as const;
+
+// tag → 中文分类名,用于 blog 页按系列分组
+export const TAG_CATEGORIES: Record<string, string> = {
+  os: "操作系统",
+  network: "网络",
+  gpu: "GPU & CUDA",
+  cuda: "GPU & CUDA",
+  llm: "LLM",
+  mlsys: "MLSys",
+  distributed: "分布式系统",
+};
+
+// 分类在 blog 页面的显示顺序(未列出的排在后面,「其他」永远最末)
+export const CATEGORY_ORDER = [
+  "操作系统",
+  "网络",
+  "GPU & CUDA",
+  "LLM",
+  "MLSys",
+  "分布式系统",
+];

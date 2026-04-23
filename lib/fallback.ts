@@ -1,6 +1,5 @@
 /*  lib/fallback.ts
-    当 NOTION_TOKEN 没配置 / 还没建 database 时,用这些假数据先跑起来。
-    让你第一次 npm run dev 就能看到效果,不用被 API 细节卡住。 */
+    Fallback content used when Notion is not configured yet. */
 
 import type { Post, Note } from "./notion";
 
@@ -8,39 +7,67 @@ export const FALLBACK_POSTS: Post[] = [
   {
     id: "f1",
     slug: "hello-world",
-    title: "Hello, world —— 这个网站怎么来的",
+    title: "01 网站为什么重新做",
     date: "2026-04-20",
     tags: ["meta", "site"],
-    excerpt:
-      "为什么又建了一个个人站,以及我想用它记录什么。(编辑 Notion 里的 blog database,这里会自动换成你的真文章)",
+    excerpt: "记录这个站点的设计方向、内容组织方式，以及为什么把博客和笔记重新整理成分类结构。",
     readTime: "3 min",
+    category: "站点",
+    order: 1,
   },
   {
     id: "f2",
+    slug: "notion-workflow",
+    title: "02 Notion 到博客的内容流",
+    date: "2026-04-18",
+    tags: ["meta", "workflow"],
+    excerpt: "梳理从 Notion 数据库到前端页面的同步方式，避免每次改内容都重新部署。",
+    readTime: "5 min",
+    category: "站点",
+    order: 2,
+  },
+  {
+    id: "f3",
     slug: "reading-list",
-    title: "2026 年的阅读清单 —— 系统、AI、一点点哲学",
+    title: "01 今年的系统阅读清单",
     date: "2026-04-10",
     tags: ["reading", "learning"],
-    excerpt: "今年打算认真读完的 10 本书,以及为什么选它们。",
+    excerpt: "把操作系统、网络和 AI infra 的阅读路线按主题整理，方便长期推进。",
     readTime: "6 min",
+    category: "阅读",
+    order: 1,
   },
 ];
 
 export const FALLBACK_NOTES: Note[] = [
   {
-    id: "f1",
-    title: "Designing Data-Intensive Applications",
+    id: "n1",
+    title: "01 Designing Data-Intensive Applications",
     kind: "book",
     author: "Martin Kleppmann",
     progress: 72,
-    note: "第 7 章之前可以每周啃一章。事务隔离级别那一节值得反复看。",
+    note: "重点回看复制、事务隔离和流处理这几章，后面可以继续拆成专题笔记。",
+    order: 1,
+    updated: "2026-04-20",
   },
   {
-    id: "f2",
-    title: "",
+    id: "n2",
+    title: "02 CUDA 编程模型速记",
+    kind: "framework",
+    author: "NVIDIA",
+    progress: 35,
+    note: "先把 grid、block、warp 之间的关系记熟，再往共享内存和 occupancy 深挖。",
+    order: 2,
+    updated: "2026-04-18",
+  },
+  {
+    id: "n3",
+    title: "03 What I cannot create",
     kind: "quote",
     author: "Richard Feynman",
     progress: 0,
-    note: '"What I cannot create, I do not understand." —— 贴在我的台灯上。',
+    note: "\"What I cannot create, I do not understand.\" 这句很适合作为做系统学习时的提醒。",
+    order: 3,
+    updated: "2026-04-16",
   },
 ];

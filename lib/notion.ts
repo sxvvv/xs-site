@@ -45,6 +45,9 @@ export interface Post {
   tags: string[];
   excerpt: string;
   readTime: string;
+  series?: string;
+  category?: string;
+  order?: number;
 }
 
 export interface PostDetail extends Post {
@@ -58,6 +61,56 @@ export interface Note {
   author: string;
   progress: number;
   note: string;
+  order?: number;
+  updated?: string;
+}
+
+function extractLeadingOrder(value: string): number | undefined {
+  const match = value
+    .trim()
+    .match(/^(\d{1,3})(?:[\s._\-:\u3001\uFF1A]|$)/);
+  if (!match) return undefined;
+  return Number.parseInt(match[1], 10);
+}
+
+function readTextValue(prop: any): string {
+  if (!prop) return "";
+  if (typeof prop.number === "number") return String(prop.number);
+  if (prop.select?.name) return prop.select.name;
+  if (prop.status?.name) return prop.status.name;
+  if (Array.isArray(prop.rich_text)) return plainText(prop.rich_text);
+  if (Array.isArray(prop.title)) return plainText(prop.title);
+  if (Array.isArray(prop.multi_select) && prop.multi_select.length > 0) {
+    return prop.multi_select.map((item: any) => item.name).join(" ");
+  }
+  return "";
+}
+
+function getOrderValue(props: any, fallbackText = ""): number | undefined {
+  const candidates = ["Order", "Index", "No", "Number", "序号", "编号"];
+
+  for (const name of candidates) {
+    const prop = getProp(props, name);
+    if (!prop) continue;
+
+    if (typeof prop.number === "number") return prop.number;
+
+    const parsed = extractLeadingOrder(readTextValue(prop));
+    if (typeof parsed === "number") return parsed;
+  }
+
+  return extractLeadingOrder(fallbackText);
+}
+
+function getCategoryValue(props: any): string | undefined {
+  const candidates = ["Category", "Categories", "分类", "类目", "Topic"];
+
+  for (const name of candidates) {
+    const value = readTextValue(getProp(props, name)).trim();
+    if (value) return value;
+  }
+
+  return undefined;
 }
 
 /*  ─────────────── 博客列表 ─────────────── */
@@ -126,6 +179,10 @@ export async function getPosts(): Promise<Post[]> {
     const excerpt = plainText(getProp(props, "Excerpt")?.rich_text);
     const readTime = plainText(getProp(props, "ReadTime")?.rich_text) || "5 min";
     const explicitSlug = plainText(getProp(props, "Slug")?.rich_text).trim();
+    const seriesProp = getProp(props, "Series");
+    const series = seriesProp?.select?.name || plainText(seriesProp?.rich_text).trim() || undefined;
+    const category = getCategoryValue(props);
+    const order = getOrderValue(props, title);
 
     return {
       id: page.id,
@@ -135,6 +192,9 @@ export async function getPosts(): Promise<Post[]> {
       tags,
       excerpt,
       readTime,
+      series,
+      category,
+      order,
     };
   });
 
@@ -180,15 +240,33 @@ export async function getNotes(): Promise<Note[]> {
     }
   }
 
-  return res.results.map((page: any) => {
+  const notes = res.results.map((page: any) => {
     const props = page.properties;
+    const title = plainText(getProp(props, "Name")?.title) || "";
+    const updated =
+      getProp(props, "Updated")?.date?.start ??
+      page.last_edited_time ??
+      page.created_time ??
+      new Date().toISOString();
+
     return {
       id: page.id,
-      title: plainText(getProp(props, "Name")?.title) || "",
+      title,
       kind: getProp(props, "Kind")?.select?.name ?? "note",
       author: plainText(getProp(props, "Author")?.rich_text),
       progress: getProp(props, "Progress")?.number ?? 0,
       note: plainText(getProp(props, "Note")?.rich_text),
+      order: getOrderValue(props, title),
+      updated: updated.slice(0, 10),
     };
+  });
+
+  return notes.sort((a: Note, b: Note) => {
+    const aOrder = a.order ?? Number.POSITIVE_INFINITY;
+    const bOrder = b.order ?? Number.POSITIVE_INFINITY;
+
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    if (a.updated !== b.updated) return a.updated! < b.updated! ? 1 : -1;
+    return a.title.localeCompare(b.title, "zh-CN", { numeric: true, sensitivity: "base" });
   });
 }
